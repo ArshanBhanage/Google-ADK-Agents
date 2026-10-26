@@ -1,0 +1,29 @@
+#!/usr/bin/env python3
+import os
+from pathlib import Path
+
+
+def setup(root: Path) -> list[str]:
+    missing = []
+    examples = [root / ".env.example", *sorted((root / "agents").glob("*/.env.example")), root / "web/.env.example"]
+    for example in examples:
+        target = example.with_name(".env")
+        try:
+            descriptor = os.open(target, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        except FileExistsError:
+            if target.is_symlink():
+                raise ValueError("Refusing symlink: " + str(target.relative_to(root)))
+        else:
+            with os.fdopen(descriptor, "w") as output:
+                output.write(example.read_text())
+        for line in target.read_text().splitlines():
+            if line.strip() and not line.lstrip().startswith("#") and "=" in line:
+                key, value = line.split("=", 1)
+                if not value.strip().strip("\"'"):
+                    missing.append(str(target.relative_to(root)) + ": " + key.strip())
+    return missing
+
+
+if __name__ == "__main__":
+    for field in setup(Path(__file__).resolve().parents[1]):
+        print(field)

@@ -1,0 +1,9 @@
+*
+!pyproject.toml
+!uv.lock
+!api/
+!api/**
+!packages/
+!packages/**
+**/__pycache__/
+**/.env
