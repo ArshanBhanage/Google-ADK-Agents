@@ -97,7 +97,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             missing=missing,
             gemini="BLOCKED" if "GOOGLE_API_KEY" in missing else "CONFIGURED_NOT_VERIFIED",
             agents=[
-                AgentStatus(id=key, name=value, status="NOT_STARTED")
+                AgentStatus(
+                    id=key,
+                    name=value,
+                    status="BLOCKED_LIVE_VERIFICATION" if key == "lead_research" else "NOT_STARTED",
+                )
                 for key, value in AGENTS.items()
             ],
         )

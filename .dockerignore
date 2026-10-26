@@ -5,5 +5,7 @@
 !api/**
 !packages/
 !packages/**
+!agents/
+!agents/**
 **/__pycache__/
 **/.env

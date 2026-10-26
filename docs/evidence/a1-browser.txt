@@ -1,0 +1,45 @@
+
+> adk-suite-web@0.1.0 test:e2e
+> playwright test
+
+[WebServer] INFO:     Started server process [76050]
+[WebServer] INFO:     Waiting for application startup.
+[WebServer] INFO:     Application startup complete.
+[WebServer] INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+[WebServer] (node:76081) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 1 test using 1 worker
+
+(node:76083) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✘  1 tests/foundation.spec.ts:3:1 › real API readiness and all five application routes (5.4s)
+
+
+  1) tests/foundation.spec.ts:3:1 › real API readiness and all five application routes ─────────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: getByText('GOOGLE_API_KEY', { exact: true })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" getByText('GOOGLE_API_KEY', { exact: true }) with timeout 5000ms
+      - waiting for getByText('GOOGLE_API_KEY', { exact: true })
+
+
+       5 |   await expect(page.getByRole('heading', { name: 'Five workflows. Verifiable results.' })).toBeVisible();
+       6 |   await expect(page.getByRole('heading', { name: 'BLOCKED', exact: true })).toBeVisible();
+    >  7 |   await expect(page.getByText('GOOGLE_API_KEY', { exact: true })).toBeVisible();
+         |                                                                   ^
+       8 |   await expect(page.locator('.card')).toHaveCount(5);
+       9 |   for (const id of ['lead_research', 'gemini_cli_tool', 'bug_assistant', 'code_reviewer', 'ecommerce']) {
+      10 |     await page.locator(`nav a[href="#${id}"]`).click();
+        at /Users/arshan/Documents/ChatGPT/ADK Agent Assignment/web/tests/foundation.spec.ts:7:67
+
+    Error Context: test-results/foundation-real-API-readin-27617-all-five-application-routes/error-context.md
+
+  1 failed
+    tests/foundation.spec.ts:3:1 › real API readiness and all five application routes ──────────────

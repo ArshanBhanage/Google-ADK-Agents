@@ -1,0 +1,33 @@
+# A1 live gate attempt
+# 2026-10-26T23:48:29Z
+$ uv run pytest -m live tests/integration/test_lead_live.py
+__________ ERROR at setup of test_report_is_deduplicated_and_ordered ___________
+429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. ', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}]}}
+
+The above exception was the direct cause of the following exception:
+
+On how to mitigate this issue, please refer to:
+
+https://google.github.io/adk-docs/agents/models/google-gemini/#error-code-429-resource_exhausted
+
+
+429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. ', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}]}}
+
+The above exception was the direct cause of the following exception:
+BLOCKED_PROVIDER_QUOTA: the Gemini API returned 429 RESOURCE_EXHAUSTED after the configured retries. Lead discovery depends on live Google Search grounding and will not be substituted with stored or generated results. Run `make probe-lead` to see which capability is exhausted, then enable paid-tier billing for this key's project or configure another authorized search API.
+
+During handling of the above exception, another exception occurred:
+BLOCKED_PROVIDER_QUOTA: the Gemini API returned 429 RESOURCE_EXHAUSTED after the configured retries. Lead discovery depends on live Google Search grounding and will not be substituted with stored or generated results. Run `make probe-lead` to see which capability is exhausted, then enable paid-tier billing for this key's project or configure another authorized search API.
+=============================== warnings summary ===============================
+agents/lead_research/agent.py:97
+tests/integration/test_lead_live.py::test_pipeline_actually_called_google_search
+
+agents/lead_research/agent.py:91
+tests/integration/test_lead_live.py::test_pipeline_actually_called_google_search
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+ERROR tests/integration/test_lead_live.py::test_pipeline_actually_called_google_search
+ERROR tests/integration/test_lead_live.py::test_every_returned_lead_is_backed_by_retrieved_bytes
+ERROR tests/integration/test_lead_live.py::test_report_is_deduplicated_and_ordered
+================== 4 warnings, 3 errors in 176.30s (0:02:56) ===================

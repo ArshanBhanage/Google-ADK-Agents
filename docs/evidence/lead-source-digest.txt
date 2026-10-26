@@ -1,0 +1,1 @@
+6c7e8c8826693f351fba9d534c009cd25801f4d6252a2220c5e0b74c3ede7927  https://www.python.org/  # pragma: allowlist secret -- public content digest

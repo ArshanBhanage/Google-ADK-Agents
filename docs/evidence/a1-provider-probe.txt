@@ -1,0 +1,13 @@
+# A1 provider capability probe
+# 2026-10-26T23:48:10Z
+$ make probe-lead
+uv run --frozen python -m scripts.lead-preflight --live
+model=gemini-3.6-flash generation=OK google_search_grounding=429_RESOURCE_EXHAUSTED
+BLOCKED_SEARCH_GROUNDING: google_search returned 429_RESOURCE_EXHAUSTED while plain generation succeeded, so this key has no usable Google Search grounding quota.
+Lead discovery requires live search and will not be faked. To unblock, either
+  1. enable paid-tier billing for this API key's project, then check usage at
+     https://ai.dev/rate-limit and rerun this command, or
+  2. supply credentials for another authorized real search API.
+Nothing downstream of discovery can be verified until one of these is done.
+make: *** [probe-lead] Error 2
+exit=2

@@ -1,5 +1,6 @@
 # Agent milestones
 
-The five component directories currently hold local configuration contracts only.
-No empty agent modules or fake root_agent exports are supplied. Implement A after
-foundation gate 0 passes, then B, C, D and E in the order defined in the master prompt.
+[Part A](lead_research/README.md) has a real root_agent and partial A1 architecture.
+A1 is blocked on Gemini configuration and live verification; ranking/report
+validation remain incomplete. A2 has not started. The other component directories
+contain configuration contracts only; no fake agent exports are supplied.

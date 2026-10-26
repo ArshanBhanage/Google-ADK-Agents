@@ -1,0 +1,70 @@
+#0 building with "desktop-linux" instance using docker driver
+
+#1 [internal] load build definition from api.Dockerfile
+#1 transferring dockerfile: 503B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.12.14-slim
+#2 ...
+
+#3 [auth] library/python:pull token for registry-1.docker.io
+#3 DONE 0.0s
+
+#4 [internal] load metadata for ghcr.io/astral-sh/uv:0.12.10
+#4 DONE 0.9s
+
+#2 [internal] load metadata for docker.io/library/python:3.12.14-slim
+#2 DONE 1.0s
+
+#5 [internal] load .dockerignore
+#5 transferring context: 149B done
+#5 DONE 0.0s
+
+#6 FROM ghcr.io/astral-sh/uv:0.12.10@sha256:2bb3ebca0a796a155094a27773d290c4b074572e6107f171d88d086682fd2500
+#6 resolve ghcr.io/astral-sh/uv:0.12.10@sha256:2bb3ebca0a796a155094a27773d290c4b074572e6107f171d88d086682fd2500 done
+#6 DONE 0.0s
+
+#7 [stage-0 1/9] FROM docker.io/library/python:3.12.14-slim@sha256:f77ac9e44ae96ef2c90b8053ea08c31f8be030f824196b0ae4db6d462c84e51f
+#7 resolve docker.io/library/python:3.12.14-slim@sha256:f77ac9e44ae96ef2c90b8053ea08c31f8be030f824196b0ae4db6d462c84e51f done
+#7 DONE 0.0s
+
+#8 [internal] load build context
+#8 transferring context: 194.60kB done
+#8 DONE 0.0s
+
+#9 [stage-0 3/9] WORKDIR /app
+#9 CACHED
+
+#10 [stage-0 4/9] COPY pyproject.toml uv.lock ./
+#10 CACHED
+
+#11 [stage-0 5/9] RUN uv sync --locked --no-dev
+#11 CACHED
+
+#12 [stage-0 2/9] COPY --from=ghcr.io/astral-sh/uv:0.12.10 /uv /usr/local/bin/uv
+#12 CACHED
+
+#13 [stage-0 6/9] COPY packages ./packages
+#13 CACHED
+
+#14 [stage-0 7/9] COPY api ./api
+#14 DONE 0.0s
+
+#15 [stage-0 8/9] COPY agents ./agents
+#15 DONE 0.0s
+
+#16 [stage-0 9/9] RUN useradd --uid 10001 --create-home app && mkdir /app/.local && chown app:app /app/.local
+#16 DONE 0.1s
+
+#17 exporting to image
+#17 exporting layers 0.0s done
+#17 exporting manifest sha256:ad240f03d9125ace5935030e54567ed4798893db37ab01e339ad79db572a2616 done
+#17 exporting config sha256:e78576d6dfc38513030079c7343ee1d9212b3dda27f2dd6e05d1f1f8b7264296 done
+#17 exporting attestation manifest sha256:64b56b6479a8039e2b4089b8e549a771b24cfd6ce79e9a52bfb5c0adc9240aee done
+#17 exporting manifest list sha256:01f24c3ef7f884fdec45ded3d34128e6bc78cec2c946516134cee868adbac200 done
+#17 naming to docker.io/library/adk-suite-foundation:latest done
+#17 unpacking to docker.io/library/adk-suite-foundation:latest 0.0s done
+#17 DONE 0.1s
+
+View build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/mir2nsmmjlm0ubopzf1anzgl4
+lead_research

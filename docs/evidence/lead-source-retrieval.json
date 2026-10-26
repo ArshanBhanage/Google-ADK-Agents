@@ -1,0 +1,9 @@
+{
+  "verification": "actual public HTTPS fetch through PublicWebsiteSource",
+  "url": "https://www.python.org/",
+  "retrieved_at": "2026-10-26T22:58:14.386764+00:00",
+  "title": "Welcome to Python.org",
+  "characters": 6664,
+  "scope": "Source adapter only. Not a company lead or successful Gemini execution.",
+  "digest_evidence": "lead-source-digest.txt"
+}

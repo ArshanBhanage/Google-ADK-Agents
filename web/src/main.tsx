@@ -45,9 +45,9 @@ function App() {
       <nav aria-label="Applications"><a href="#" aria-current={!route ? 'page' : undefined}>Overview</a>
         {status?.agents.map(agent => <a key={agent.id} href={`#${agent.id}`} aria-current={selected?.id === agent.id ? 'page' : undefined}>{agent.name}</a>)}
       </nav><p className="sidebar-note">Local development<br/>Evidence before completion.</p></aside>
-    <main><header><span className="eyebrow">GOOGLE AGENT DEVELOPMENT KIT</span><span className="pill">Foundation · In progress</span></header>
+    <main><header><span className="eyebrow">GOOGLE AGENT DEVELOPMENT KIT</span><span className="pill">Foundation · Verified locally</span></header>
       <h1>{selected ? selected.name.slice(4) : 'Five workflows. Verifiable results.'}</h1>
-      <p className="intro">{selected ? 'This agent has not started. The authenticated session service is available for foundation verification.' : 'Research, tools, debugging, review and commerce. Each application advances only after its milestone gate is verified.'}</p>
+      <p className="intro">{selected ? (selected.id === 'lead_research' ? 'A1 architecture is implemented. Live search verification is blocked pending Gemini configuration. Use make run-adk after configuration; results UI follows at gate A2.' : 'This agent has not started. The authenticated session service is available for foundation verification.') : 'Research, tools, debugging, review and commerce. Each application advances only after its milestone gate is verified.'}</p>
       {error && <div className="error" role="alert">{error}</div>}
       {!status && !error && <p role="status">Checking the API…</p>}
       {status && <>

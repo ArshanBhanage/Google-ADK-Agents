@@ -4,12 +4,12 @@ Assignment 3: five independently runnable ADK applications with authenticated
 sessions, a shared React interface, reproducible checks and evidence of live
 integrations. Implementation follows the supplied master prompt's strict gates.
 
-**Current scope:** foundation implementation and verification. No completed agent,
+**Current scope:** foundation passed; Part A architecture started and blocked on live verification. No completed agent,
 live model execution, cloud deployment or public GitHub submission is claimed.
 
 | Part | Intended capability | Status |
 |---|---|---|
-| A | Evidence-backed lead research and export | Not started |
+| A | Evidence-backed lead research and export | [A1 blocked: no Google Search grounding quota on the configured key](agents/lead_research/README.md); A2 not started |
 | B | Real Gemini CLI tool in an ADK pipeline | Not started |
 | C | MCP issue investigation | Not started |
 | D | Grounded code review and isolated tests | Not started |
@@ -48,4 +48,4 @@ flowchart LR
 GitHub URL: not published. Deployment URL: not deployed.
 [YouTube slots](docs/videos/README.md): all pending user recording/upload.
 `make verify-all` will be added only when all five real verification paths exist;
-`make check` currently checks the foundation only.
+`make check` checks the foundation and implemented A1 logic; it does not prove live integrations.

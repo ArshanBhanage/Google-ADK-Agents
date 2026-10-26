@@ -32,7 +32,8 @@ npm run test:e2e
 The browser check uses the actual API and blank configuration, with no provider
 mocks. It launches its own servers; stop existing servers on ports 8000/5173 first.
 For this execution only, runtime installations are under /private/tmp/adk-python
-and /private/tmp/node-v24.22.1-darwin-arm64. These are temporary; a normal clean
+and /private/tmp/node-v24.22.1-darwin-arm64. Local .venv and web/node_modules are ignored symlinks into temporary storage
+to avoid syncing generated dependencies through iCloud Documents. These are temporary; a normal clean
 checkout uses installed runtimes. Python .venv can be recreated with `uv sync`.
 
 GCloud and Gemini CLI installation are deferred to their phases. Shopify and a

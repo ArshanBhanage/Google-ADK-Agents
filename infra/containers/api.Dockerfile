@@ -5,6 +5,7 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --locked --no-dev
 COPY packages ./packages
 COPY api ./api
+COPY agents ./agents
 RUN useradd --uid 10001 --create-home app && mkdir /app/.local && chown app:app /app/.local
 USER 10001
 ENV PATH="/app/.venv/bin:$PATH"

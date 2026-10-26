@@ -43,3 +43,50 @@ References: [ADK](https://adk.dev/),
 [Google Search](https://adk.dev/integrations/google-search/),
 [package metadata](https://pypi.org/project/google-adk/),
 [Node release policy](https://nodejs.org/en/about/previous-releases).
+
+## A1 implementation checkpoint
+
+The installed GoogleSearchTool accepts Gemini model identifiers generally, while
+one ADK docs paragraph still says Gemini 2 only. Keep search isolated, choose a
+current model from https://ai.google.dev/gemini-api/docs/models, and require a
+real grounding run before claiming compatibility. The load-time default is
+`gemini-3.8-flash`, but execution fails closed until GEMINI_MODEL is explicitly set.
+
+For intake-controlled AgentTool composition, use pinned supported template agents;
+the installed deprecation warning documents that Workflow cannot yet be an
+LlmAgent sub-agent. The graph alternative is not silently assumed compatible.
+No hidden chain-of-thought is exposed. Future A2 must enforce final citations,
+rank deterministically and render Google search suggestions before completion.
+
+## A1 provider findings, 2026-10-26T23:48Z
+
+Measured against the user's own Gemini Developer API key, not inferred from docs.
+
+- Model availability is per-key. `gemini-2.5-flash` and `gemini-2.5-pro` return
+  `404` with "no longer available to new users" and a pointer to `gemini-3.8-flash`.
+  The configured `gemini-3.6-flash` is valid for this key. Enumerate the key's own
+  entitlement from the `models` endpoint rather than hardcoding a model name; the
+  load-time default stays `gemini-3.8-flash` and execution fails closed unless
+  `GEMINI_MODEL` is set explicitly.
+- Grounding entitlement is separate from model entitlement. Plain `generateContent`
+  succeeds while the identical request with the built-in `google_search` tool returns
+  `429 RESOURCE_EXHAUSTED`. Reproduced on `gemini-3.6-flash`, `gemini-3.8-flash` and
+  `gemini-3.1-flash-lite`, which rules out a model-specific cause. Readiness checks
+  must therefore probe the capability, not just the presence of a key, which is why
+  `scripts/lead-preflight.py` has a `--live` mode and why the configuration-only
+  mode reports `CONFIGURED_NOT_VERIFIED` rather than a pass.
+- Transient `503 UNAVAILABLE` on plain calls is common enough to matter. Each agent
+  gets its own `Gemini` model instance carrying
+  `types.HttpRetryOptions(attempts=6, initial_delay=5, exp_base=2, max_delay=90,
+  jitter=1, http_status_codes=[429, 500, 502, 503, 504])`. This is the documented
+  genai client retry surface, used in preference to a hand-rolled loop. A 429 that
+  outlives the backoff is raised as `ProviderBlocked`, never degraded into a
+  partial or substituted result.
+- Parallel discovery doubles the instantaneous request rate, which is what first
+  surfaced the rate limit. The shape is kept because the two evidence angles are
+  genuinely independent, and the cost is documented rather than hidden by
+  serialising the pipeline.
+- Qualification was moved out of the model into `EvidenceRanker`, a plain
+  `BaseAgent`. Citations are only accepted when the excerpt appears verbatim in the
+  page actually retrieved for that URL and the page names the company; digests and
+  timestamps are overwritten with observed values so a model cannot assert them.
