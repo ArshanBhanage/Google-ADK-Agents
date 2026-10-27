@@ -14,7 +14,6 @@ from google.genai import errors, types
 from packages.agent_core.config import Settings
 
 PROBE = "Reply with the single word ok."
-REQUIRED = ("GOOGLE_API_KEY", "GEMINI_MODEL")
 TRANSIENT = (500, 502, 503, 504)
 
 
@@ -38,20 +37,27 @@ def capability(client: genai.Client, model: str, *, grounded: bool) -> str:
 
 def main(live: bool) -> int:
     settings = Settings()
-    values = {
-        "GOOGLE_API_KEY": settings.google_api_key.get_secret_value(),
-        "GEMINI_MODEL": settings.gemini_model,
-    }
-    missing = [name for name in REQUIRED if not values[name]]
+    missing = settings.search_missing()
     if missing:
-        print(f"BLOCKED: set {', '.join(missing)} in root .env; never paste secrets in chat.")
+        print(
+            f"BLOCKED: SEARCH_PROVIDER={settings.search_provider} needs "
+            f"{', '.join(missing)} in root .env; never paste secrets in chat."
+        )
+        return 2
+    if settings.search_provider == "openrouter":
+        # Recorded as unimplemented rather than reported as a usable provider.
+        print(
+            "NOT_IMPLEMENTED: SEARCH_PROVIDER=openrouter is configured but the "
+            "openrouter:web_search adapter and LiteLlm model path are not built yet. "
+            "Set SEARCH_PROVIDER=gemini_grounding to probe the Gemini path."
+        )
         return 2
     if not live:
         print("CONFIGURED_NOT_VERIFIED: run `make probe-lead` to test the provider itself.")
         return 0
 
-    model = values["GEMINI_MODEL"]
-    client = genai.Client(api_key=values["GOOGLE_API_KEY"])
+    model = settings.gemini_model
+    client = genai.Client(api_key=settings.google_api_key.get_secret_value())
     generation = capability(client, model, grounded=False)
     grounding = capability(client, model, grounded=True)
     print(f"model={model} generation={generation} google_search_grounding={grounding}")
