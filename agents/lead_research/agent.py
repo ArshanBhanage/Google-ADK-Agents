@@ -1,5 +1,3 @@
-import os
-
 from google.adk.agents import Agent, ParallelAgent, SequentialAgent
 from google.adk.agents.context import Context
 from google.adk.models.google_llm import Gemini
@@ -12,6 +10,7 @@ from agents.lead_research.models import LeadReport, ResearchRequest
 from agents.lead_research.ranking import EvidenceRanker
 from agents.lead_research.tools import inspect_public_source
 from packages.agent_core.config import Settings
+from packages.agent_core.provider import resolve_backend
 
 DEFAULT_MODEL = "gemini-3.8-flash"
 # Free-tier keys rate-limit per minute; grounded discovery runs two searches at once.
@@ -26,19 +25,8 @@ RETRY = types.HttpRetryOptions(
 
 
 def ensure_provider() -> None:
-    """Fail closed before any billable call; export the key only into this process."""
-    settings = Settings()
-    missing = [
-        name
-        for name, value in (
-            ("GOOGLE_API_KEY", settings.google_api_key.get_secret_value()),
-            ("GEMINI_MODEL", settings.gemini_model),
-        )
-        if not value
-    ]
-    if missing:
-        raise ValueError("BLOCKED: set " + ", ".join(missing) + " in the local root .env")
-    os.environ["GOOGLE_API_KEY"] = settings.google_api_key.get_secret_value()
+    """Fail closed before any billable call and export only this process's settings."""
+    resolve_backend()
 
 
 def require_provider(callback_context: Context) -> None:

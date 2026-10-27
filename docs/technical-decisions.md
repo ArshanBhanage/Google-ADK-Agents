@@ -90,3 +90,37 @@ Measured against the user's own Gemini Developer API key, not inferred from docs
   `BaseAgent`. Citations are only accepted when the excerpt appears verbatim in the
   page actually retrieved for that URL and the page names the company; digests and
   timestamps are overwritten with observed values so a model cannot assert them.
+
+## Backend choice is a billing decision, 2026-10-27
+
+Default `GOOGLE_GENAI_USE_VERTEXAI=TRUE`, routing Gemini through Vertex AI rather
+than the Gemini Developer API.
+
+The two backends reach the same models but bill on separate tracks. Gemini Developer
+API usage originating from an AI Studio key is **not** covered by Google Cloud Free
+Trial credits; linking a billing account in AI Studio charges the payment method
+directly. Vertex AI usage bills the Cloud project, where promotional credits apply.
+Google's own developer forum carries repeated reports of this, and the behaviour is
+documented as AI Studio running on a separate billing pipeline from GCP projects
+([forum thread](https://discuss.ai.google.dev/t/free-trial-credits-not-applied-to-gemini-api-usage-via-ai-studio/135129),
+[developer-program credits thread](https://discuss.ai.google.dev/t/10-monthly-developer-program-credits-visible-in-gcp-billing-but-ai-studio-forces-prepay-top-up-no-available-credits/143815/6)).
+This was not inferred from the pricing page, which does not make the distinction.
+
+Consequences encoded in the repository:
+
+- `packages/agent_core/provider.py` resolves exactly one backend and exports only
+  that backend's environment. On Vertex it removes `GOOGLE_API_KEY` and
+  `GEMINI_API_KEY` from the process environment, because a stray key would silently
+  authenticate the other backend and bill the wrong account.
+- Vertex AI authenticates with application default credentials, so no key material
+  enters the repository or the environment. A missing ADC file produces
+  `BLOCKED_ADC` with the exact gcloud commands rather than an opaque auth error.
+- `Settings.search_missing()` branches on the backend, so readiness names
+  `GOOGLE_CLOUD_PROJECT`/`GOOGLE_CLOUD_LOCATION` instead of `GOOGLE_API_KEY` when
+  Vertex is selected.
+- The Gemini Developer API path is retained and still supported, since it is the
+  cheaper choice for anyone holding paid-tier AI Studio credit rather than Cloud
+  credit. The default favours the credit this project actually has.
+- Model availability is per-region on Vertex AI and differs from the Developer API's
+  per-key entitlement, so `make probe-lead` reports `project` and `location`
+  alongside the capability result and must be rerun after any region change.

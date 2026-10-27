@@ -22,6 +22,11 @@ class Settings(BaseSettings):
     allowed_google_subjects: str = ""
     google_api_key: SecretStr = SecretStr("")
     gemini_model: str = ""
+    # Vertex AI bills the Cloud project, where Free Trial credits apply; the Gemini
+    # Developer API key bills a separate pipeline that those credits do not cover.
+    google_genai_use_vertexai: bool = False
+    google_cloud_project: str = ""
+    google_cloud_location: str = "us-central1"
     search_provider: Literal["gemini_grounding", "openrouter"] = "gemini_grounding"
     openrouter_api_key: SecretStr = SecretStr("")
     openrouter_model: str = ""
@@ -48,10 +53,17 @@ class Settings(BaseSettings):
 
     def search_missing(self) -> list[str]:
         """Settings the selected search provider needs. Presence is not entitlement."""
+        required: tuple[tuple[str, str], ...]
         if self.search_provider == "openrouter":
             required = (
                 ("OPENROUTER_API_KEY", self.openrouter_api_key.get_secret_value()),
                 ("OPENROUTER_MODEL", self.openrouter_model),
+            )
+        elif self.google_genai_use_vertexai:
+            required = (
+                ("GOOGLE_CLOUD_PROJECT", self.google_cloud_project),
+                ("GOOGLE_CLOUD_LOCATION", self.google_cloud_location),
+                ("GEMINI_MODEL", self.gemini_model),
             )
         else:
             required = (
