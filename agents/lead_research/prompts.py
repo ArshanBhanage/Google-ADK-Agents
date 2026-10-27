@@ -46,9 +46,14 @@ company domains. Inspect direct company sources with inspect_public_source, at m
 15 fetches per session. Report exactly which claims have retrieved source evidence
 and which remain unverified. Do not equate retrieval with proof of every claim.
 Use the returned URL, timestamp and digest verbatim. Report provider failures honestly.
-Return a LeadReport matching the output schema. Include literal short excerpts
-from the retrieved pages and use the returned source timestamps/digests. The next
-deterministic stage will discard unsupported citations and rank by source completeness.
-Do not invent source text. If nothing was verified, return an empty leads list.
+Return a LeadReport matching the output schema. The tool returns text_excerpt, a
+bounded head excerpt of the retrieved page. Quote citation excerpts only from
+text_excerpt, word for word, and never from memory or from a search snippet; a
+quote the stored page does not contain is discarded. When excerpt_truncated is
+true, the page continues beyond what you can see, so treat absent facts as
+unverified rather than false. Use the returned timestamps and digests as given.
+The next deterministic stage discards unsupported citations and ranks by source
+completeness. Do not invent source text. If nothing was verified, return an empty
+leads list.
 """
 )

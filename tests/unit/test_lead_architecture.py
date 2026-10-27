@@ -10,6 +10,7 @@ from agents.lead_research.agent import root_agent
 from agents.lead_research.models import Citation, Lead, LeadReport, ResearchRequest, SourcePage
 from agents.lead_research.ranking import canonical_domain, qualify_report
 from agents.lead_research.sources import SourceError, VisibleText, require_public, validate_url
+from agents.lead_research.tools import MODEL_EXCERPT_CHARS, model_view
 
 
 @pytest.mark.parametrize(
@@ -172,6 +173,30 @@ def test_verified_leads_are_deduplicated_and_ranked_by_evidence() -> None:
     assert {citation.content_sha256 for citation in lead.citations} == {
         evidence[url].content_sha256 for url in evidence
     }
+
+
+def test_model_sees_a_bounded_excerpt_while_verification_keeps_full_text() -> None:
+    long_text = "Acme Tooling sells CNC fixtures. " + ("filler sentence. " * 2000)
+    page = _page("https://acme.example/", long_text)
+    view = model_view(page)
+
+    assert len(view["text_excerpt"]) == MODEL_EXCERPT_CHARS
+    assert view["excerpt_truncated"] is True
+    assert view["retrieved_chars"] == len(page.text)
+    # The projection must not leak the untrimmed body under any key.
+    assert not any(
+        isinstance(value, str) and len(value) > MODEL_EXCERPT_CHARS for value in view.values()
+    )
+    # A quote taken from the excerpt still verifies against the stored page.
+    quoted = view["text_excerpt"][:40]
+    qualified = qualify_report(
+        LeadReport(
+            leads=[_claim("Acme Tooling", "acme.example", [(page.url, quoted)])], limitations=[]
+        ),
+        {page.url: page},
+    )
+    assert len(qualified.leads) == 1
+    assert qualified.leads[0].citations[0].content_sha256 == page.content_sha256
 
 
 def test_citation_digest_is_replaced_by_the_retrieved_bytes() -> None:
