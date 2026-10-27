@@ -27,12 +27,6 @@ class Settings(BaseSettings):
     google_genai_use_vertexai: bool = False
     google_cloud_project: str = ""
     google_cloud_location: str = "us-central1"
-    search_provider: Literal["gemini_grounding", "openrouter"] = "gemini_grounding"
-    openrouter_api_key: SecretStr = SecretStr("")
-    openrouter_model: str = ""
-    openrouter_search_engine: Literal[
-        "auto", "native", "exa", "perplexity", "parallel", "firecrawl"
-    ] = "auto"
     session_database_url: SecretStr = SecretStr("")
 
     @model_validator(mode="after")
@@ -51,15 +45,14 @@ class Settings(BaseSettings):
         directory.mkdir(mode=0o700, exist_ok=True)
         return f"sqlite+aiosqlite:///{directory / 'sessions.db'}"
 
-    def search_missing(self) -> list[str]:
-        """Settings the selected search provider needs. Presence is not entitlement."""
+    def provider_missing(self) -> list[str]:
+        """Settings the selected Gemini backend needs. Presence is not entitlement.
+
+        A pure configuration report for readiness messaging. Actual resolution,
+        including credential discovery, lives in agent_core.provider.
+        """
         required: tuple[tuple[str, str], ...]
-        if self.search_provider == "openrouter":
-            required = (
-                ("OPENROUTER_API_KEY", self.openrouter_api_key.get_secret_value()),
-                ("OPENROUTER_MODEL", self.openrouter_model),
-            )
-        elif self.google_genai_use_vertexai:
+        if self.google_genai_use_vertexai:
             required = (
                 ("GOOGLE_CLOUD_PROJECT", self.google_cloud_project),
                 ("GOOGLE_CLOUD_LOCATION", self.google_cloud_location),

@@ -46,20 +46,9 @@ def capability(client: genai.Client, model: str, *, grounded: bool) -> str:
 
 def main(live: bool) -> int:
     settings = Settings()
-    missing = settings.search_missing()
+    missing = settings.provider_missing()
     if missing:
-        print(
-            f"BLOCKED: SEARCH_PROVIDER={settings.search_provider} needs "
-            f"{', '.join(missing)} in root .env; never paste secrets in chat."
-        )
-        return 2
-    if settings.search_provider == "openrouter":
-        # Recorded as unimplemented rather than reported as a usable provider.
-        print(
-            "NOT_IMPLEMENTED: SEARCH_PROVIDER=openrouter is configured but the "
-            "openrouter:web_search adapter and LiteLlm model path are not built yet. "
-            "Set SEARCH_PROVIDER=gemini_grounding to probe the Gemini path."
-        )
+        print(f"BLOCKED: set {', '.join(missing)} in root .env; never paste secrets in chat.")
         return 2
     try:
         backend = resolve_backend(settings)
