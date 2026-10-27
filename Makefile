@@ -2,7 +2,7 @@ UV ?= uv
 NPM ?= npm
 export UV_CACHE_DIR ?= $(CURDIR)/.cache/uv
 
-.PHONY: setup lint typecheck test check run-api run-web check-secrets check-container
+.PHONY: setup lint typecheck test check run-api run-web check-secrets check-container check-node setup-gemini-cli preflight-cli verify-cli
 setup:
 	$(UV) sync --locked
 	$(NPM) --prefix web ci
@@ -10,7 +10,9 @@ setup:
 lint:
 	$(UV) run --frozen ruff check .
 	$(UV) run --frozen ruff format --check .
-typecheck:
+check-node:
+	./scripts/check-node
+typecheck: check-node
 	$(UV) run --frozen mypy packages api agents
 	$(NPM) --prefix web run typecheck
 test:
@@ -38,3 +40,11 @@ integration-lead: probe-lead
 	$(UV) run --frozen pytest -m live tests/integration/test_lead_live.py -v
 verify-lead: probe-lead
 	$(UV) run --frozen python -m scripts.lead-live-smoke $(LEAD_REQUEST)
+
+setup-gemini-cli: check-node
+	$(NPM) --prefix infra/gemini-cli install --no-audit --no-fund
+	infra/gemini-cli/node_modules/.bin/gemini --version
+preflight-cli:
+	$(UV) run --frozen python -m scripts.cli-preflight
+verify-cli:
+	$(UV) run --frozen python -m scripts.cli-preflight --live

@@ -29,6 +29,9 @@ class Settings(BaseSettings):
     # Gemini 3 models are served from the global endpoint on Vertex AI; regional
     # endpoints such as us-central1 return 404 NOT_FOUND for them.
     google_cloud_location: str = "global"
+    # Part B. Blank gemini_cli_path falls back to the pinned local install, then PATH.
+    gemini_cli_path: str = ""
+    gemini_workspace: str = ""
     session_database_url: SecretStr = SecretStr("")
 
     @model_validator(mode="after")

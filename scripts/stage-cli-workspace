@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+"""Stage a credential-free copy of this project's source for the Gemini CLI to read.
+
+Gemini CLI 0.65.0 loads a project `.env` from its working directory *and every ancestor*,
+and a trusted workspace loads every variable in it. Pointing the CLI at any directory
+inside this repository would therefore expose the local root `.env`. Verified: a
+GOOGLE_API_KEY in an ancestor `.env` overrode the Vertex credentials in the child
+environment and the request authenticated as a different project.
+
+So the workspace lives outside the repository and receives only source directories.
+The copy is real project code, not sample data, and the CLI's findings are checkable
+against it.
+"""
+
+import shutil
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+DESTINATION = Path.home() / ".cache" / "adk-suite" / "cli-workspace"
+SOURCES = ("packages", "agents", "api", "scripts")
+SKIP_DIRECTORIES = {".git", "node_modules", ".venv", "__pycache__", "dist", ".cache"}
+
+
+def copyable(directory: str, names: list[str]) -> set[str]:
+    skipped = {name for name in names if name in SKIP_DIRECTORIES}
+    # Never stage a credential, even though the sources below should not hold one.
+    skipped |= {
+        name
+        for name in names
+        if (name.startswith(".env") and name != ".env.example")
+        or name.endswith((".pem", ".key", ".p12", ".pfx"))
+    }
+    return skipped
+
+
+def main() -> int:
+    if DESTINATION.exists():
+        shutil.rmtree(DESTINATION)
+    DESTINATION.mkdir(parents=True)
+    staged = 0
+    for name in SOURCES:
+        source = ROOT / name
+        if not source.is_dir():
+            continue
+        shutil.copytree(source, DESTINATION / name, ignore=copyable)
+        staged += 1
+    leaked = [
+        str(path.relative_to(DESTINATION))
+        for path in DESTINATION.rglob("*")
+        if path.is_file()
+        and ((path.name.startswith(".env") and path.name != ".env.example") or path.suffix in {".pem", ".key"})
+    ]
+    if leaked:
+        shutil.rmtree(DESTINATION)
+        print(f"BLOCKED: refusing to stage credential files: {', '.join(leaked)}")
+        return 2
+    files = sum(1 for path in DESTINATION.rglob("*") if path.is_file())
+    print(f"staged {staged} source trees, {files} files")
+    print(f"GEMINI_WORKSPACE={DESTINATION}")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -124,3 +124,61 @@ Consequences encoded in the repository:
 - Model availability is per-region on Vertex AI and differs from the Developer API's
   per-key entitlement, so `make probe-lead` reports `project` and `location`
   alongside the capability result and must be rerun after any region change.
+
+## Gemini CLI findings, 2026-10-27 (B1)
+
+Pinned `@google/gemini-cli` 0.65.0 in `infra/gemini-cli/package.json` with a lockfile
+rather than installing globally, so the version a reviewer runs is the version tested.
+Published `engines` is `node >=20`. Flags were confirmed against the installed binary's
+own `--help`, not from documentation: `-p/--prompt` for headless, `-o/--output-format`
+with `text|json|stream-json`, `--approval-mode` with `default|auto_edit|yolo|plan`.
+`plan` is used as the read-only mode and is not configurable from a request. `--yolo`
+exists and is never used.
+
+The successful JSON shape is `{response, session_id, stats}`, with `stats` containing
+`files`, `models` and `tools`, and `error` present on failure.
+
+Three behaviours were found by running it, each of which would have produced a wrong
+or unsafe result if assumed:
+
+1. **Untrusted folders gate.** Exit 55 with no stdout when the working directory is
+   not trusted. More importantly the CLI *silently downgrades* `--approval-mode plan`
+   to `default` in that state, printing "Approval mode overridden to default because
+   the current folder is not trusted". A read-only policy therefore cannot be relied
+   on unless trust is granted explicitly, so `GEMINI_CLI_TRUST_WORKSPACE=true` is set
+   for the allowlisted workspace only.
+
+2. **Provider key precedence.** The CLI prefers `GOOGLE_API_KEY`/`GEMINI_API_KEY` when
+   present even with `GOOGLE_GENAI_USE_VERTEXAI=true`. With a stray key exported the
+   request authenticated against an unrelated project and returned
+   `403 BILLING_DISABLED` for project #764739161492. The child environment is built
+   from an allowlist and both key names are excluded, with a test that observes the
+   child's own view of the variable rather than only asserting on the dict.
+
+3. **Ancestor `.env` loading, the significant one.** The CLI loads a project `.env`
+   from its working directory *and every ancestor directory*, and a trusted workspace
+   loads every variable in it. Proven with a controlled test: a bogus `GOOGLE_API_KEY`
+   placed in the parent of a temporary workspace overrode the Vertex credentials passed
+   in the child environment and the call failed with 401 from that key. Passing a clean
+   child environment is therefore **not sufficient**, and any directory inside this
+   repository is unusable as a workspace because the local root `.env` sits above it.
+
+   An attempted fix via `advanced.excludedEnvVars` supplied through
+   `GEMINI_CLI_SYSTEM_SETTINGS_PATH` did **not** take effect in 0.65.0 — the ancestor
+   key still won. That configuration was removed rather than shipped as a control that
+   does not work. The control that is shipped is verifiable and under our own code's
+   authority: `resolve_workspace` refuses a workspace containing a credential file
+   anywhere in its subtree, and refuses one with a `.env` in any ancestor directory.
+   `scripts/stage-cli-workspace` therefore stages real project source into
+   `~/.cache/adk-suite/cli-workspace`, outside the repository, and refuses to stage if
+   a credential file would be copied.
+
+## Node version pin is now enforced, 2026-10-27
+
+`.node-version` pinned 24.22.1 and `web/package.json` requires `>=24 <25`, but the
+active Node was 25.2.1 and 24.22.1 had never been installed, so every frontend build
+before this point ran on an unpinned runtime while the documentation claimed otherwise.
+24.22.1 is now installed via nvm and `scripts/check-node` fails `make typecheck` with
+`BLOCKED_NODE_VERSION` when the active version differs. `nvm use` reads
+`.node-version`, so no argument is needed. The guard is fail-closed because a build on
+an unverified runtime is exactly the kind of unearned claim this project disallows.

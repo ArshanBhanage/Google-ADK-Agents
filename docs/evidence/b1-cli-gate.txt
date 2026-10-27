@@ -1,0 +1,10 @@
+# B1 live gate: real gemini executable as an ADK-ready adapter
+# 2026-10-27T17:52:38Z
+node v24.22.1
+
+$ make verify-cli
+uv run --frozen python -m scripts.cli-preflight --live
+gemini_cli_version=0.65.0
+backend=vertex_ai model=gemini-3.6-flash project=refined-clarity-512906-a5 location=global workspace=/Users/arshan/.cache/adk-suite/cli-workspace
+VERIFIED: exit=0 duration_ms=12411 session=3d5ae74e-bb8d-4dfe-b37e-c3cddc78b1e0 response_chars=1314
+exit=

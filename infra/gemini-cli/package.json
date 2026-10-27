@@ -1,0 +1,12 @@
+{
+  "name": "adk-suite-gemini-cli",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Pins the real Gemini CLI executable used as an ADK tool in Part B. Installed locally with a lockfile rather than globally so the version a reviewer runs is the version that was tested.",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "dependencies": {
+    "@google/gemini-cli": "0.65.0"
+  }
+}
