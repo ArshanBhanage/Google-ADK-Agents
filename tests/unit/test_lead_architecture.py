@@ -7,7 +7,13 @@ from google.adk.agents import LlmAgent
 from pydantic import ValidationError
 
 from agents.lead_research.agent import root_agent
-from agents.lead_research.models import Citation, Lead, LeadReport, ResearchRequest, SourcePage
+from agents.lead_research.models import (
+    CandidateCitation,
+    CandidateLead,
+    CandidateReport,
+    ResearchRequest,
+    SourcePage,
+)
 from agents.lead_research.ranking import canonical_domain, qualify_report
 from agents.lead_research.sources import SourceError, VisibleText, require_public, validate_url
 from agents.lead_research.tools import MODEL_EXCERPT_CHARS, model_view
@@ -90,23 +96,13 @@ def _page(url: str, text: str) -> SourcePage:
     )
 
 
-def _claim(name: str, domain: str, cited: list[tuple[str, str]]) -> Lead:
-    """An unverified model claim: digests are placeholders until evidence is matched."""
-    return Lead(
+def _claim(name: str, domain: str, cited: list[tuple[str, str]]) -> CandidateLead:
+    """An unverified model claim. It cannot carry a digest, score or confidence."""
+    return CandidateLead(
         name=name,
         domain=domain,
         match_explanation="model claim pending verification",
-        confidence="low",
-        verification="unverified",
-        citations=[
-            Citation(
-                url=url,
-                retrieved_at=datetime(2026, 10, 26, 12, 0, tzinfo=UTC),
-                excerpt=excerpt,
-                content_sha256="0" * 64,
-            )
-            for url, excerpt in cited
-        ],
+        citations=[CandidateCitation(url=url, excerpt=excerpt) for url, excerpt in cited],
     )
 
 
@@ -126,7 +122,7 @@ def test_unsupported_claims_are_discarded_not_downgraded() -> None:
     text = "Northwind Logistics operates three depots."
     evidence = {"https://northwind.example/about": _page("https://northwind.example/about", text)}
     url = "https://northwind.example/about"
-    report = LeadReport(
+    report = CandidateReport(
         leads=[
             # Excerpt is absent from the retrieved page.
             _claim("Northwind Logistics", "northwind.example", [(url, "invented quote")]),
@@ -162,7 +158,9 @@ def test_verified_leads_are_deduplicated_and_ranked_by_evidence() -> None:
         "northwind.example",
         [("https://trade-press.example/news", "expanded its Ohio depots")],
     )
-    qualified = qualify_report(LeadReport(leads=[third_party_only, both], limitations=[]), evidence)
+    qualified = qualify_report(
+        CandidateReport(leads=[third_party_only, both], limitations=[]), evidence
+    )
     # Both claims normalise to one organisation; the better-evidenced one survives.
     assert len(qualified.leads) == 1
     lead = qualified.leads[0]
@@ -190,7 +188,7 @@ def test_model_sees_a_bounded_excerpt_while_verification_keeps_full_text() -> No
     # A quote taken from the excerpt still verifies against the stored page.
     quoted = view["text_excerpt"][:40]
     qualified = qualify_report(
-        LeadReport(
+        CandidateReport(
             leads=[_claim("Acme Tooling", "acme.example", [(page.url, quoted)])], limitations=[]
         ),
         {page.url: page},
@@ -205,8 +203,11 @@ def test_citation_digest_is_replaced_by_the_retrieved_bytes() -> None:
     claimed = _claim(
         "Acme Tooling", "acme.example", [("https://acme.example/", "sells CNC fixtures")]
     )
-    assert claimed.citations[0].content_sha256 == "0" * 64
-    qualified = qualify_report(LeadReport(leads=[claimed], limitations=[]), evidence)
+    # The wire contract has no field in which a model could assert provenance.
+    assert "content_sha256" not in CandidateCitation.model_fields
+    assert "retrieved_at" not in CandidateCitation.model_fields
+    assert not {"score", "confidence", "verification"} & set(CandidateLead.model_fields)
+    qualified = qualify_report(CandidateReport(leads=[claimed], limitations=[]), evidence)
     assert (
         qualified.leads[0].citations[0].content_sha256
         == evidence["https://acme.example/"].content_sha256

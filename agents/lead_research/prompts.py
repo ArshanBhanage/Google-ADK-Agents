@@ -45,15 +45,18 @@ Secondary: {secondary_candidates}. Deduplicate
 company domains. Inspect direct company sources with inspect_public_source, at most
 15 fetches per session. Report exactly which claims have retrieved source evidence
 and which remain unverified. Do not equate retrieval with proof of every claim.
-Use the returned URL, timestamp and digest verbatim. Report provider failures honestly.
-Return a LeadReport matching the output schema. The tool returns text_excerpt, a
-bounded head excerpt of the retrieved page. Quote citation excerpts only from
-text_excerpt, word for word, and never from memory or from a search snippet; a
-quote the stored page does not contain is discarded. When excerpt_truncated is
-true, the page continues beyond what you can see, so treat absent facts as
-unverified rather than false. Use the returned timestamps and digests as given.
-The next deterministic stage discards unsupported citations and ranks by source
+Report provider failures honestly. Return a CandidateReport matching the output
+schema: for each lead give name, domain, match_explanation, and citations of url
+plus excerpt. Use the url exactly as the tool returned it.
+The tool returns text_excerpt, a bounded head excerpt of the retrieved page. Quote
+each citation excerpt from text_excerpt word for word, never from memory or from a
+search snippet; a quote the stored page does not contain is discarded. When
+excerpt_truncated is true the page continues beyond what you can see, so treat an
+absent fact as unverified rather than false.
+Do not report a score, confidence or verification status, and do not report a
+timestamp or digest. The next deterministic stage derives all of those from the
+page that was actually fetched, discards unsupported citations and ranks by source
 completeness. Do not invent source text. If nothing was verified, return an empty
-leads list.
+leads list and say why in limitations.
 """
 )

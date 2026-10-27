@@ -1,0 +1,183 @@
+{
+  "started_at": "2026-10-27T06:55:07.158927+00:00",
+  "finished_at": "2026-10-27T06:56:14.971697+00:00",
+  "request": {
+    "industry": "industrial CNC machining services",
+    "region": "Ohio, United States",
+    "buyer_profile": "independent machine shops that publish their own capability and equipment pages",
+    "quantity": 3,
+    "exclusions": []
+  },
+  "trace": {
+    "invocation_id": "028e702a-f79c-4710-a399-27b968833511",
+    "events": 9,
+    "used_google_search": true,
+    "search_queries": [
+      "CNC machining services Ohio equipment capability page",
+      "independent machine shop Ohio equipment list capabilities",
+      "Ohio CNC machining capabilities list equipment list machine shop",
+      "CNC machining equipment list site com Ohio machine shop capabilities",
+      "independent CNC machine shop equipment list Ohio",
+      "precision CNC machining capabilities equipment list Ohio machine shop",
+      "machine shop equipment list location Ohio",
+      "Ohio machine shop equipment list",
+      "Lebanon Ohio equipment list CNC machining",
+      "equipment list Springfield Ohio CNC machining",
+      "equipment list Mansfield Ohio",
+      "equipment list Celina Ohio",
+      "equipment list Ohio CNC machining",
+      "Wagner Machine Norton Ohio CNC machining equipment list",
+      "FM Machine Co Akron Ohio CNC machining capabilities",
+      "Union Enterprises Westerville Ohio CNC machining equipment list",
+      "CNC machining services Ohio equipment list capability page"
+    ],
+    "grounding_sources": [
+      "https://www.google.com/search?q=time+in+Morrow+County,+US",
+      "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHcw3Z31C223T_lkvudgilvcquxTl1OtJHcuWN9GfpdSXvYz6GSEgAnMTsAkWuyEIcERn6-l77x5Tly-HFKxQacfMAZ39wgkvbq5nZoNKPsBbU46r4Z7N0aP_szzdZkXztyIijuuXcpynoZD1hg-iAqx7NikyYk8tnpBFVwHp-rbNvgXe8=",
+      "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQE6nR4_4GPgvcnLIn1IHT5AL4-xR3-BHm5yOneEdSP-Q6d0Bl7jL0z9J9E0VglQNsEGvwVPFSGa6lw4xuVV7kV85jhvgThFVs-25cuDJI7N1tXPuOK_y3ynjW_ilcqfnp6oO0U5",
+      "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGMrSJvxeQ7r72cFFQsDc89QQqUogxEhIKi4R3H4uc4lkAtlo3CDkjTt8RsJvaMcZk0-r26mNzt0hZ0Ghlhd9CrmF9QEkvA0ie9qUD26LXP4Ri9CdqqYtm21Cizt4MHZCFx5EIw",
+      "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQH5efY0k4HJTeZBEG6sHxqA3fe-_w7MCoyNiFChJn9pjlf8YMprKCZGV1GabNwZu4L6ffDMEp-RraC_uyW8TRtqbT0Rl8W6uTcdJ5u1YWQYL2mNiApMIctTx2mnCM2UBijNC7zNjF8R9qUiqL1G82Awdjqe-qU=",
+      "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHohLZgMLivKmuzAJHqtEie8-FME8HIv-o8PcN8nU79Euhv1eH5eXZkBG9ysxIQ1oMZUAXHKmFw14V0N5Bcwole-pB6Ikfr9YoDlkigfzlBHgY5CXG2cQLDfyLBOpnT4-n8vxnyVwrqD-t7ty8mqXTG6nTudyvQDUKSMp9gF7C8",
+      "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGXKxij5DGnBGPJ-RcFkujlzgoIeCPMDAA37nJJ09bpu4-4wD-6WYr6KNhI_qqzI3jm17YR6eSRKmvEDaD2P9ZgQcLWIB62fExlVcaGKHZu0g5PHpL5cMV1HHeMMfQO-ak=",
+      "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQEwi1YaYeA9D8iBcKDdLytiS9p4xIhWGf955mUx3QT9EADyqqXxR2Hni_DKPrTClWZXqT8wCvRuNPb699x-N89CWqS-iAyowYq71kv-G-1XIhFVQIels8iS6nlSzbbj9qBn9oDpunGbm1Hhk76k0syKyW4Y4DBwsRIXz07zX4vCGYCYh0lSlrRJoDUl8v8gUcPc_Qxy2LFbepcC",
+      "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHuvsdKzGaiwUgOoqIprdGTWsnJGoHD6AfDynTAJpgygl1nuFsiE5FLJ6S4pRZRywRueExJ3_VZYMMkYnyoqs2LKMKE4s2sOI9cs9AdC2tzGQIOkL3bdWRF0zRAFgg=",
+      "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHXCt1LY6KFDuI7KBZli0ZHgJer-EmOiUk24GP-aFyyI6QXK1n5SasdW3No3iqJDv84AiwsdjYYYI0WfU7DK9pvS60CsyZdaRSxWTNATrfWhQbGShH2-wisbPecJYsUQLlx5TVdik5BfQn1BQ==",
+      "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFcRzcL4wSnvQwrX45iLxTzo_e0dXEusfNiRoW72BloSNl0MKiaamPwwJN0QRZUY1eqgtU3foWe7MwLWq8_ZamJ6Avt44TaIL6ntf8TlV_fJ-Aeb6g1p8qe4-IydFpX9ryUWkD3qkqDCeqAkcwRewHS0YoKLmr-K6mx",
+      "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQF6ci4fAyYUyf-LeHCXrUEVPM0kO2lXHs9lPdgXTqDCTBOPRLo6dDGOC76irnxvQKoHQI4ouB2C_b8qDiyJaFzz_YbmdpAVSQ7cVim9Jkqsh5UYT2hcNuNVb-0N",
+      "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGpNlhL_6yjg6TRp-VejJmg8pEf2n3kX-YMjgASGH3BzSBdUYyiUgjjhTbUJTwqA68xijnBg5MUNylVJGdbwqO8yYV7LbqFlofQ8eB6AD3uoXqX18ZtopJiM7wa9cHDeR0=",
+      "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFHHAoMffZEh3mXZ8wzHUyJzQBBSP-PeRGlcYiz36a-hQ1sv3rkrhSXWb6wUkpCi7d5pM7xVoQfBpuvLCNmPX4yZmjDsk37oVkzzAtKABM9VcJROVU2hmoovdcCdN_elpA=",
+      "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFjohf9H3Qmes2HyS7P9jJLo4au_BgwbPtZ4XnliR-c4NprW0BsNGv5jB6vOHhBua4_qjTmpZSEYrggBrRtQlRcY0UxgHoYR9KPmZsEri_ykM_LpXx6kKPopUFJzYmwiZ1bPpo=",
+      "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFByl2WVr_skNLaMDyhU7l03fRfH_DDC6LPU1Goz8EiwJwlfH8q_t6JWHc4q5W0_QI0XbTBihBFEVnMf2K8tRIfCnmhht8H2_KG5E6E5DE0nOmNQbE=",
+      "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFevjWUtvdQhalEaCwilTmJNLbwLNocjL9PMQjWglv2jOPx48WW-Gvb3IMjmJIaQHcEqp5cgKtkiQt_VcBCRHJbXHZ4kjKm7v-p5EGfDLhKxVHNxnkSlRo9AC18KjWkKqHalkPd88NFlAmnujGcQtOinJwNLw7fbabVir5pf3aEOC4EkQ==",
+      "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGcDJ5W5Iq5EZceYiHA1psMcghBC1rCzeDlm9oaf7yaz2gOr1HXkonkgy6O0QRc82C66dk-BTUJZQLtx3aLICqOfaJBSxT_42BKANs13lsNWDvGJksAfsvwlQk1zAOdY--CTs_-fHhDaAYptN9IMDkL_FB7Mw==",
+      "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHGeTzEKIJJ2TSqvTjWFs-pj9r7Y8pN8UOrFqaklw6DfReg-gscLWb-pW7GBItqFPdUzTqHGkNeOpBMAKe52bQgRciXPUq8MWTvnxoeLwBCf3sZYAElR88bvUs3tV_7DV6ziKfqBvg39qeXJ-CXWtz-AJIPDSo=",
+      "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGUTOjdqtL2xVdUmL_1SUxf4-gtlgdV6u1J4e5kD47Ef-LD35RKuLWglPGdQqMqy69d4nkRuUCYkcL0AYVmCWQIIH1yPHbI3gdthFeJPemNvcGyf04-RKZEZtI8X2zolOTN0MDaw_BR15eedoCLgLUYrvNmNBzyMGsMLPLo588=",
+      "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQF3o5BjiqHk-ITEFRM7RBJwF_2-fnJnGWCxMW-d8sbWB2h4fXeG22dc80YqjJ-0RyRsfPt5zv5fmsQYWtgDyc8LLLAOD0UvfKPVmGmHuRW6nCkc3sY8lMYb7Q_Ir3e6_HVy2nx1cPCgfmdwUwCktx9Y3RiX02OqnSPiKL4khSQj_Wsnsw==",
+      "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFxGSWOYeLJkETPJuLUUBA1lmtGAKD-GVFQq0MsZzwjzrn-3CHQKQOgiAxLTl7N4goPpcbnyze4GMbNvgbKHCq2xejgD63bnclb7Igx6wC7dQ==",
+      "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQFIOtNljz07Cd3Hl3BZnifpssceqSd-30R8Uw8lIw13gkHBhGAiOGenf4dUyoGifvWnCXWRiuOzhCAxXW04c7E9axSXwBh3XE3Z6BvX5is-xkR9Cuoozrf7y7B03O4=",
+      "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQENBfGGuoGQ1llwTzcuk2Ag_uHg_4tJYg8jzZH-fG15brf2VWdTIpvJ-3CyIEKUu0KoJv0Up7YksuUH-zO41X9ZbZWA4a3vGoOBffoJCxBUcRIqIAS7-9JGkrTq3IrvWg==",
+      "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGiprImYAIyQqEb2_hoZCvR1NUtcoMGW4ml5_iJ2qlStlMOJixyHTqpRA9lPwWFDU-PrxzpoWoa31d2YKPfKUaDupPCvvhsYHyOs3dx0DVFAmIw4GF8uLHaex7eQw==",
+      "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQGtBFn3JIv9IvkGiOBihSp3uFbXPs58FKfr1dczNs0UaJVdMdpuYrdxGFuqM4RJgFHRHlH1tnE4h8iG4S9BWP3NEfiKZDv2it5xOtzfhqsO1qKLL5yfXu7t0Tg1qYsNQGUaeLs=",
+      "https://vertexaisearch.cloud.google.com/grounding-api-redirect/AUZIYQHKaQXdpz-RWWHouyR5U94VcnQ5WmuZOnerUysKSSYAFSgUbk1ez4ITD4kB0q14bm2RtFala49DVPVLWe0yMewkVFHb8UpUjhyPErr7GfmGDg=="
+    ],
+    "model_versions": [
+      "gemini-3.6-flash"
+    ],
+    "tool_invocations": [
+      {
+        "agent": "source_validator",
+        "tool": "inspect_public_source",
+        "outcome": "called"
+      },
+      {
+        "agent": "source_validator",
+        "tool": "inspect_public_source",
+        "outcome": "called"
+      },
+      {
+        "agent": "source_validator",
+        "tool": "inspect_public_source",
+        "outcome": "called"
+      },
+      {
+        "agent": "source_validator",
+        "tool": "inspect_public_source",
+        "outcome": "called"
+      },
+      {
+        "agent": "source_validator",
+        "tool": "inspect_public_source",
+        "outcome": "RETRIEVED"
+      },
+      {
+        "agent": "source_validator",
+        "tool": "inspect_public_source",
+        "outcome": "RETRIEVED"
+      },
+      {
+        "agent": "source_validator",
+        "tool": "inspect_public_source",
+        "outcome": "RETRIEVED"
+      },
+      {
+        "agent": "source_validator",
+        "tool": "inspect_public_source",
+        "outcome": "UNVERIFIED"
+      },
+      {
+        "agent": "source_validator",
+        "tool": "inspect_public_source",
+        "outcome": "called"
+      },
+      {
+        "agent": "source_validator",
+        "tool": "inspect_public_source",
+        "outcome": "called"
+      },
+      {
+        "agent": "source_validator",
+        "tool": "inspect_public_source",
+        "outcome": "RETRIEVED"
+      },
+      {
+        "agent": "source_validator",
+        "tool": "inspect_public_source",
+        "outcome": "UNVERIFIED"
+      }
+    ],
+    "retrieved_sources": [
+      "https://wagnermachine.com",
+      "https://fmmachine.com",
+      "https://union-ent.com",
+      "https://tooltech.com"
+    ],
+    "usage": {
+      "prompt_tokens": 33885,
+      "output_tokens": 4984,
+      "thought_tokens": 5857,
+      "billable_searches": 17
+    }
+  },
+  "report": {
+    "leads": [
+      {
+        "name": "Union Enterprises",
+        "domain": "union-ent.com",
+        "match_explanation": "Union Enterprises is an independent machine shop operating in Westerville, Ohio that publishes its specific CNC milling and turning capabilities, machine list, and work envelopes.",
+        "score": 70,
+        "confidence": "medium",
+        "verification": "source_retrieved",
+        "citations": [
+          {
+            "url": "https://union-ent.com",
+            "retrieved_at": "2026-10-27T06:55:55.019755Z",
+            "excerpt": "Union Enterprises builds milled and turned components for medical, automotive, and test-and-measurement customers.",
+            "content_sha256": "7a0473fa94736e358bec87a946c177ea8b33eef2ba5824b2bbd2e6a10fa66541"
+          }
+        ]
+      },
+      {
+        "name": "Wagner Machine, Inc.",
+        "domain": "wagnermachine.com",
+        "match_explanation": "Wagner Machine, Inc. is an independent machine shop located in Norton, Ohio that publicly publishes its custom precision CNC machining, turning, milling, and fabrication capabilities.",
+        "score": 70,
+        "confidence": "medium",
+        "verification": "source_retrieved",
+        "citations": [
+          {
+            "url": "https://wagnermachine.com",
+            "retrieved_at": "2026-10-27T06:55:48.168459Z",
+            "excerpt": "For over 65 years, Wagner Machine, Inc. has been a trusted machine shop in Ohio, providing custom machining, precision machining services, and fabrication in Norton, Ohio\u2014just west of Akron.",
+            "content_sha256": "0330db2cb38224e7628dcadbe7d7dc0975a1567c0a2505819445a990ac4a4414"
+          }
+        ]
+      }
+    ],
+    "limitations": [
+      "bestmmi.com was unverified due to a cross-origin redirect error during source inspection.",
+      "rablemachineinc.com was unverified due to a crawl delay requirement during source inspection.",
+      "Discarded 1 candidates without matching retrieved text and company name.",
+      "Score measures source completeness, not proven commercial suitability."
+    ]
+  }
+}

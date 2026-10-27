@@ -44,6 +44,39 @@ class LeadReport(BaseModel):
     limitations: list[str]
 
 
+class CandidateCitation(BaseModel):
+    """A citation the model proposes, before anything is checked.
+
+    Retrieval timestamp and content digest are deliberately absent. They are not
+    the model's to assert; the deterministic stage fills them from the page that
+    was actually fetched, so a fabricated digest is structurally impossible.
+    """
+
+    url: str
+    excerpt: str
+
+
+class CandidateLead(BaseModel):
+    name: str
+    domain: str
+    match_explanation: str
+    citations: list[CandidateCitation]
+
+
+class CandidateReport(BaseModel):
+    """The validator's wire contract, kept deliberately minimal.
+
+    Vertex AI rejects a response schema as complex as LeadReport with 400
+    INVALID_ARGUMENT, so this carries no regex, length or item constraints. It also
+    omits score, confidence and verification, which the deterministic ranking stage
+    derives from observed evidence rather than accepting from the model. Strict
+    validation of the published contract happens on LeadReport.
+    """
+
+    leads: list[CandidateLead]
+    limitations: list[str]
+
+
 class SourcePage(BaseModel):
     url: str
     retrieved_at: datetime

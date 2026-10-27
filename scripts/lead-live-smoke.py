@@ -42,6 +42,10 @@ def main(path: Path) -> int:
     )
     print(f"events={trace.events} search_used={trace.used_google_search}")
     print(f"retrieved_sources={len(trace.retrieved_sources)} verified_leads={len(report.leads)}")
+    print(
+        f"usage: prompt={trace.prompt_tokens} output={trace.output_tokens} "
+        f"thoughts={trace.thought_tokens} billable_searches={trace.billable_searches}"
+    )
     print(f"evidence={EVIDENCE.relative_to(ROOT)}")
     if not trace.used_google_search:
         print("BLOCKED: the run completed without any observed Google Search grounding")

@@ -63,6 +63,7 @@ def resolve_backend(settings: Settings | None = None) -> Backend:
                 "GOOGLE_GENAI_USE_VERTEXAI=TRUE to bill Vertex AI against Cloud credits."
             )
         os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "FALSE"
+        os.environ["GOOGLE_GENAI_USE_ENTERPRISE"] = "FALSE"
         os.environ["GOOGLE_API_KEY"] = key
         return Backend(name="gemini_api", model=config.gemini_model)
 
@@ -83,7 +84,11 @@ def resolve_backend(settings: Settings | None = None) -> Backend:
 
     # An API key left in .env must not reach a Vertex call; the backends authenticate
     # differently and a stray key silently changes which account is billed.
+    # Installed ADK 2.13.0 still reads GOOGLE_GENAI_USE_VERTEXAI but warns that
+    # GOOGLE_GENAI_USE_ENTERPRISE supersedes it. Both are set so the behaviour does
+    # not change silently when the deprecated name is removed.
     os.environ["GOOGLE_GENAI_USE_VERTEXAI"] = "TRUE"
+    os.environ["GOOGLE_GENAI_USE_ENTERPRISE"] = "TRUE"
     os.environ["GOOGLE_CLOUD_PROJECT"] = config.google_cloud_project
     os.environ["GOOGLE_CLOUD_LOCATION"] = config.google_cloud_location
     os.environ.pop("GOOGLE_API_KEY", None)

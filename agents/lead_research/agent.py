@@ -6,7 +6,7 @@ from google.adk.tools.google_search_tool import google_search
 from google.genai import types
 
 from agents.lead_research import prompts
-from agents.lead_research.models import LeadReport, ResearchRequest
+from agents.lead_research.models import CandidateReport, ResearchRequest
 from agents.lead_research.ranking import EvidenceRanker
 from agents.lead_research.tools import inspect_public_source
 from packages.agent_core.config import Settings
@@ -73,7 +73,7 @@ def build_pipeline() -> SequentialAgent:
         instruction=prompts.VALIDATE,
         tools=[inspect_public_source],
         output_key="candidate_report",
-        output_schema=LeadReport,
+        output_schema=CandidateReport,
         generate_content_config=common,
     )
     return SequentialAgent(

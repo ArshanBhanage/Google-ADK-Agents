@@ -26,7 +26,9 @@ class Settings(BaseSettings):
     # Developer API key bills a separate pipeline that those credits do not cover.
     google_genai_use_vertexai: bool = False
     google_cloud_project: str = ""
-    google_cloud_location: str = "us-central1"
+    # Gemini 3 models are served from the global endpoint on Vertex AI; regional
+    # endpoints such as us-central1 return 404 NOT_FOUND for them.
+    google_cloud_location: str = "global"
     session_database_url: SecretStr = SecretStr("")
 
     @model_validator(mode="after")

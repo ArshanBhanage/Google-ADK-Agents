@@ -6,7 +6,7 @@ No application or live integration is complete at initialization.
 | Gate | Goal | Status | Acceptance |
 |---|---|---|---|
 | 0 | Runtime, configuration, auth/session foundation, API/UI, CI | PASSED | Local checks, persistent sessions, API/UI and dependency diagnostics |
-| A1 | Lead research architecture | BLOCKED (Google Search grounding quota) | ADK load, real retrieval, schemas |
+| A1 | Lead research architecture | PASSED | ADK load, real retrieval, schemas |
 | A2 | Lead research end-to-end | NOT_STARTED | Grounded live query, UI and matching CSV |
 | B1 | Restricted Gemini CLI tool | NOT_STARTED | Actual CLI invocation and negative tests |
 | B2 | CLI ADK pipeline | NOT_STARTED | Real trace and UI |
@@ -98,3 +98,61 @@ against the real provider instead of being deferred.
 
 A1 stays BLOCKED on an externally controlled quota. Per the execution order, A2
 and Parts B–E are not started.
+
+## A1 — PASSED 2026-10-27T06:55Z (America/Los_Angeles)
+
+The blocker was a billing track, not a quota. Gemini Developer API usage from an AI
+Studio key is not covered by Google Cloud Free Trial credits, and that backend's free
+tier does not offer Google Search grounding at all. Switching to Vertex AI on a
+credit-eligible project unblocked it. Two further real obstacles were found and fixed
+by measurement rather than assumption:
+
+- Gemini 3 models return `404 NOT_FOUND` on regional Vertex endpoints such as
+  `us-central1`; they are served from `location=global`. The default was changed.
+- Vertex rejected `LeadReport` as a response schema with `400 INVALID_ARGUMENT`.
+  Bisecting showed no single unsupported keyword: `Citation` and `Lead` were each
+  accepted alone, and `pattern`, `minLength`, `maxItems`, enums and `date-time` all
+  passed individually. The nested whole was refused. Rather than keep probing a paid
+  API, the validator now emits a minimal `CandidateReport` wire contract and the
+  deterministic stage maps it to the strict `LeadReport`.
+
+That change tightened the evidence rules as a side effect. `CandidateCitation` has no
+digest or timestamp field and `CandidateLead` has no score, confidence or verification
+field, so the model is now structurally unable to assert provenance or rank itself. A
+test asserts those fields are absent from the wire contract.
+
+Commands and observed results:
+
+- `make check`: exit 0. 31 unit tests, Ruff, mypy (16 files), TypeScript, secret scan
+  0 findings, Vite build.
+- `make probe-lead`: exit 0.
+  `backend=vertex_ai model=gemini-3.6-flash project=refined-clarity-512906-a5
+  location=global generation=OK google_search_grounding=OK`.
+  Evidence: `evidence/a1-provider-probe.txt`.
+- `make integration-lead`: **3 passed**, 106s. Asserts grounding metadata was actually
+  observed, that every surviving lead cites a URL present in the session's retrieved
+  evidence, and that the report is deduplicated and ordered.
+  Evidence: `evidence/a1-live-gate.txt`.
+- `make verify-lead`: exit 0. `events=9 search_used=True retrieved_sources=4
+  verified_leads=2`. Evidence: `evidence/a1-live-run.txt` and
+  `evidence/a1-live-grounded-run.json`.
+
+Two real Ohio machine shops were returned with excerpts quoted from pages this code
+fetched itself, each pinned to the retrieval timestamp and the SHA-256 of the actual
+response body. Three further candidates were reported unverified with specific
+reasons (cross-origin redirect, robots crawl-delay requirement, per-session retrieval
+budget) and one was discarded for failing excerpt matching. Nothing was substituted
+for missing data.
+
+Measured cost of one run, from `usage_metadata` rather than estimated:
+33,885 prompt tokens, 4,984 output, 5,857 thinking, and 17 billable search queries.
+At the published Flash rates that is $0.066 in tokens. Search dominates: at the
+Developer API's $14/1,000 the run is about $0.30, and about $0.66 if Vertex charges
+$35/1,000. The authoritative Vertex grounding rate is still unconfirmed, so the
+actual billing report must be checked before running at volume. Reducing the number
+of grounded stages is the lever that matters, not token trimming.
+
+Known deprecation: installed ADK warns that `GOOGLE_GENAI_USE_VERTEXAI` is superseded
+by `GOOGLE_GENAI_USE_ENTERPRISE`. Both are now exported.
+
+A2 is next. No part of B–E has been started.

@@ -47,10 +47,18 @@ class ResearchTrace:
     tool_invocations: list[ToolInvocation] = field(default_factory=list)
     retrieved_sources: list[str] = field(default_factory=list)
     model_versions: list[str] = field(default_factory=list)
+    prompt_tokens: int = 0
+    output_tokens: int = 0
+    thought_tokens: int = 0
 
     @property
     def used_google_search(self) -> bool:
         return bool(self.search_queries or self.grounding_sources)
+
+    @property
+    def billable_searches(self) -> int:
+        """Search queries are billed individually, so the count is the cost driver."""
+        return len(self.search_queries)
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -62,12 +70,23 @@ class ResearchTrace:
             "model_versions": self.model_versions,
             "tool_invocations": [vars(call) for call in self.tool_invocations],
             "retrieved_sources": self.retrieved_sources,
+            "usage": {
+                "prompt_tokens": self.prompt_tokens,
+                "output_tokens": self.output_tokens,
+                "thought_tokens": self.thought_tokens,
+                "billable_searches": self.billable_searches,
+            },
         }
 
 
 def _collect(event: Any, trace: ResearchTrace) -> None:
     if event.model_version and event.model_version not in trace.model_versions:
         trace.model_versions.append(event.model_version)
+    usage = event.usage_metadata
+    if usage:
+        trace.prompt_tokens += usage.prompt_token_count or 0
+        trace.output_tokens += usage.candidates_token_count or 0
+        trace.thought_tokens += usage.thoughts_token_count or 0
     metadata = event.grounding_metadata
     if metadata:
         for query in metadata.web_search_queries or []:

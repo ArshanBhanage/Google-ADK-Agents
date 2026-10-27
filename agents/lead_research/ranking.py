@@ -5,8 +5,16 @@ from google.adk.agents import BaseAgent
 from google.adk.agents.invocation_context import InvocationContext
 from google.adk.events import Event, EventActions
 from google.genai import types
+from pydantic import ValidationError
 
-from agents.lead_research.models import Citation, Lead, LeadReport, SourcePage
+from agents.lead_research.models import (
+    CandidateLead,
+    CandidateReport,
+    Citation,
+    Lead,
+    LeadReport,
+    SourcePage,
+)
 
 
 def canonical_domain(domain: str) -> str:
@@ -16,43 +24,71 @@ def canonical_domain(domain: str) -> str:
     return host.encode("idna").decode("ascii").lower().removeprefix("www.")
 
 
-def qualify_report(report: LeadReport, evidence: dict[str, SourcePage]) -> LeadReport:
+def _normalise(text: str) -> str:
+    return " ".join(text.split())
+
+
+def verified_citations(candidate: CandidateLead, evidence: dict[str, SourcePage]) -> list[Citation]:
+    """Keep only citations whose excerpt is present in the page we actually fetched.
+
+    The timestamp and digest come from the retrieved page, never from the model.
+    """
+    citations: list[Citation] = []
+    for proposed in candidate.citations:
+        page = evidence.get(proposed.url)
+        if page is None:
+            continue
+        body = _normalise(page.text)
+        if _normalise(proposed.excerpt) not in body:
+            continue
+        if candidate.name.casefold() not in page.text.casefold():
+            continue
+        try:
+            citations.append(
+                Citation(
+                    url=page.url,
+                    retrieved_at=page.retrieved_at,
+                    excerpt=proposed.excerpt,
+                    content_sha256=page.content_sha256,
+                )
+            )
+        except ValidationError:
+            # Model-supplied excerpt violated the published contract; drop the citation.
+            continue
+    return citations
+
+
+def qualify_report(report: CandidateReport, evidence: dict[str, SourcePage]) -> LeadReport:
+    """Turn unverified candidates into a ranked report backed by retrieved bytes."""
     unique: dict[str, Lead] = {}
     discarded = 0
-    for lead in report.leads:
-        citations = []
-        for citation in lead.citations:
-            page = evidence.get(citation.url)
-            excerpt = " ".join(citation.excerpt.split())
-            if (
-                page
-                and excerpt in " ".join(page.text.split())
-                and lead.name.casefold() in page.text.casefold()
-            ):
-                citations.append(
-                    Citation(
-                        url=page.url,
-                        retrieved_at=page.retrieved_at,
-                        excerpt=citation.excerpt,
-                        content_sha256=page.content_sha256,
-                    )
-                )
+    for candidate in report.leads:
+        citations = verified_citations(candidate, evidence)
         if not citations:
             discarded += 1
             continue
-        domain = canonical_domain(lead.domain)
-        hosts = {canonical_domain(c.url) for c in citations}
-        direct = domain in hosts
-        score = 40 + (30 if direct else 0) + (20 if len(hosts) > 1 else 0)
-        qualified = lead.model_copy(
-            update={
-                "domain": domain,
-                "citations": citations,
-                "verification": "source_retrieved",
-                "score": score,
-                "confidence": "high" if direct and len(hosts) > 1 else "medium",
-            }
-        )
+        try:
+            domain = canonical_domain(candidate.domain)
+            hosts = {canonical_domain(citation.url) for citation in citations}
+        except (ValueError, UnicodeError):
+            # An unparseable domain from untrusted output is dropped, not guessed at.
+            discarded += 1
+            continue
+        from_own_site = domain in hosts
+        corroborated = len(hosts) > 1
+        try:
+            qualified = Lead(
+                name=candidate.name,
+                domain=domain,
+                match_explanation=candidate.match_explanation,
+                score=40 + (30 if from_own_site else 0) + (20 if corroborated else 0),
+                confidence="high" if from_own_site and corroborated else "medium",
+                verification="source_retrieved",
+                citations=citations,
+            )
+        except ValidationError:
+            discarded += 1
+            continue
         previous = unique.get(domain)
         if previous is None or qualified.score > previous.score:
             unique[domain] = qualified
@@ -70,9 +106,9 @@ class EvidenceRanker(BaseAgent):
     async def _run_async_impl(self, ctx: InvocationContext) -> AsyncGenerator[Event, None]:
         raw = ctx.session.state.get("candidate_report")
         report = (
-            LeadReport.model_validate_json(raw)
+            CandidateReport.model_validate_json(raw)
             if isinstance(raw, str)
-            else LeadReport.model_validate(raw)
+            else CandidateReport.model_validate(raw)
         )
         evidence = {
             url: SourcePage.model_validate(page)

@@ -1,0 +1,13 @@
+# A1 live grounded run
+# 2026-10-27T06:54:42Z
+$ make verify-lead
+uv run --frozen python -m scripts.lead-preflight --live
+backend=vertex_ai model=gemini-3.6-flash project=refined-clarity-512906-a5 location=global generation=OK google_search_grounding=OK
+VERIFIED: generation and Google Search grounding both answered this backend.
+uv run --frozen python -m scripts.lead-live-smoke docs/examples/lead-request.json
+Warning: there are non-text parts in the response: ['function_call', 'function_call', 'function_call', 'function_call'], returning concatenated text result from text parts. Check the full candidates.content.parts accessor to get the full model response.
+events=9 search_used=True
+retrieved_sources=4 verified_leads=2
+usage: prompt=33885 output=4984 thoughts=5857 billable_searches=17
+evidence=docs/evidence/a1-live-grounded-run.json
+exit=
