@@ -4,12 +4,16 @@ import time
 import uuid
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response
 from google.adk.sessions import DatabaseSessionService
 from pydantic import BaseModel, ConfigDict
 
+from agents.gemini_cli_tool.models import CliAnswer, CliPlan, CliRequest, GroundingCheck
+from agents.gemini_cli_tool.run import PipelineError as CliPipelineError
+from agents.gemini_cli_tool.run import ProviderBlocked as CliProviderBlocked
+from agents.gemini_cli_tool.run import run_cli_pipeline
 from agents.lead_research.export import report_to_csv
 from agents.lead_research.models import LeadReport, ResearchRequest
 from agents.lead_research.run import PipelineError, ProviderBlocked, run_research
@@ -49,6 +53,26 @@ class UsageView(BaseModel):
     output_tokens: int
     thought_tokens: int
     billable_searches: int
+
+
+class StageView(BaseModel):
+    """One observable step. `kind` distinguishes an ADK model call, a deterministic
+    ADK stage and the Gemini CLI subprocess, which is the point of Part B."""
+
+    name: str
+    kind: str
+    outcome: str
+    detail: str
+
+
+class CliInspectResponse(BaseModel):
+    answer: CliAnswer
+    grounding: GroundingCheck
+    plan: CliPlan | None
+    stages: list[StageView]
+    cli_invocation: dict[str, Any] | None
+    cli_actually_ran: bool
+    usage: UsageView
 
 
 class ResearchResponse(BaseModel):
@@ -136,6 +160,57 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 )
                 for key, value in AGENTS.items()
             ],
+        )
+
+    @application.post(
+        "/api/agents/gemini_cli_tool/{session_id}/inspect", response_model=CliInspectResponse
+    )
+    async def inspect(
+        session_id: uuid.UUID, body: CliRequest, user: Annotated[Identity, Depends(identity)]
+    ) -> CliInspectResponse:
+        """Plan in ADK, inspect with the real CLI subprocess, verify deterministically."""
+        await get_session("gemini_cli_tool", session_id, user)
+        started = time.monotonic()
+        try:
+            answer, grounding, plan, trace = await run_cli_pipeline(
+                body.question,
+                session_service=sessions,
+                user_id=user.subject,
+                session_id=str(session_id),
+            )
+        except CliProviderBlocked as exc:
+            raise HTTPException(503, str(exc)) from exc
+        except CliPipelineError as exc:
+            raise HTTPException(502, str(exc)) from exc
+        logger.info(
+            json.dumps(
+                {
+                    "agent": "gemini_cli_tool",
+                    "session": str(session_id),
+                    "duration_ms": round((time.monotonic() - started) * 1000),
+                    "cli_actually_ran": trace.cli_actually_ran,
+                    "grounded": grounding.grounded,
+                }
+            )
+        )
+        return CliInspectResponse(
+            answer=answer,
+            grounding=grounding,
+            plan=plan,
+            stages=[
+                StageView(
+                    name=stage.name, kind=stage.kind, outcome=stage.outcome, detail=stage.detail
+                )
+                for stage in trace.stages
+            ],
+            cli_invocation=trace.cli_invocation,
+            cli_actually_ran=trace.cli_actually_ran,
+            usage=UsageView(
+                prompt_tokens=trace.prompt_tokens,
+                output_tokens=trace.output_tokens,
+                thought_tokens=trace.thought_tokens,
+                billable_searches=0,
+            ),
         )
 
     @application.post(

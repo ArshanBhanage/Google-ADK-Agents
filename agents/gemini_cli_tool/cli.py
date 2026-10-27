@@ -30,7 +30,9 @@ DEFAULT_EXECUTABLE = ROOT / "infra" / "gemini-cli" / "node_modules" / ".bin" / "
 # auto_edit are never used, and the value is not configurable from a request.
 APPROVAL_MODE = "plan"
 MAX_OUTPUT_BYTES = 1_000_000
-TIMEOUT_SECONDS = 180.0
+# A 55-file workspace answered in ~74s; a 97-file one exceeded 180s. The budget is
+# generous because exceeding it is reported as a failure, never as a partial answer.
+TIMEOUT_SECONDS = 300.0
 TRUST_REFUSED_EXIT = 55
 # Inherited only when already present. Deliberately excludes GOOGLE_API_KEY and
 # GEMINI_API_KEY so the child cannot authenticate as a different account.

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
+import { CliInspector } from './cli';
 import { LeadResearch } from './lead';
 import './style.css';
 
@@ -55,7 +56,8 @@ function App() {
         <section className="connection"><div><span className="eyebrow">CONNECTION READINESS</span><h2>{status.status.replaceAll('_', ' ')}</h2><p>Credential presence does not prove provider connectivity.</p></div><div><strong>Missing configuration</strong><ul>{status.missing.map(field => <li key={field}><code>{field}</code></li>)}</ul>{!status.missing.length && <p>Configured; live verification still pending.</p>}</div></section>
         {selected ? <><section className="panel"><h2>Authenticate this session</h2><p>Use your local access token or an authorized Google ID token. It stays in this page’s memory.</p><label htmlFor="token">Access credential</label><input id="token" type="password" value={token} onChange={event => setToken(event.target.value)} autoComplete="off"/><button onClick={createSession} disabled={!token || pending}>{pending ? 'Creating…' : 'Create session'}</button>{session && <p role="status">Session created: <code>{session}</code>. It is scoped to your identity; another user cannot read it.</p>}</section>
           {selected.id === 'lead_research' && session && <LeadResearch token={token} session={session}/>}
-          {selected.id !== 'lead_research' && <p>Agent execution is not implemented for this part.</p>}</>
+          {selected.id === 'gemini_cli_tool' && session && <CliInspector token={token} session={session}/>}
+          {!['lead_research', 'gemini_cli_tool'].includes(selected.id) && <p>Agent execution is not implemented for this part.</p>}</>
           : <section className="grid" aria-label="Agent milestones">{status.agents.map(agent => <a className="card" key={agent.id} href={`#${agent.id}`}><span className="eyebrow">PART {agent.name[0]}</span><h2>{agent.name.slice(4)}</h2><span className="state">{agent.status.replaceAll('_', ' ')}</span><span className="arrow" aria-hidden="true">↗</span></a>)}</section>}
       </>}
       <footer>No live results, exports or deployment are claimed. Status reflects the current implementation.</footer>

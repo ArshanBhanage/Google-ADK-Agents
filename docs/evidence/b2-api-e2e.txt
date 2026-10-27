@@ -1,0 +1,29 @@
+# B2 end-to-end against the running API
+# 2026-10-27T18:24:25Z
+
+POST /api/sessions -> 201 id=396174ff-1931-41df-8a89-7e268d0161a5
+POST inspect, 5-char question -> 422 (expected 422)
+POST inspect, no credential -> 401 (expected 401)
+POST inspect, extra field -> 422 (expected 422)
+
+POST inspect -> 200 in 107s
+  cli_actually_ran=True grounded=False
+  stages:
+    adk_llm_agent              cli_planner                            ran
+    adk_llm_agent              cli_executor                           ran
+    gemini_cli_subprocess      inspect_workspace_with_gemini_cli      called
+    gemini_cli_subprocess      inspect_workspace_with_gemini_cli      COMPLETED
+    adk_deterministic_agent    cli_grounding                          ran
+    adk_llm_agent              cli_synthesiser                        ran
+  argv: --approval-mode plan -o json -m gemini-3.6-flash -p <task>
+  exit=0 duration_ms=82140
+  workspace=/Users/arshan/.cache/adk-suite/cli-workspace
+  cli_session=72bcb096-c438-46c7-b0cc-eba4cd4a7bbd
+  verified paths: ['api/main.py', 'packages/agent_core/config.py', 'scripts/cli-pipeline-smoke.py', 'scripts/lead-live-smoke.py', 'packages/agent_core/auth.py']
+  absent paths  : ['local/sessions.db']
+  limitations:
+   - 1 named path(s) do not exist in the inspected workspace: local/sessions.db
+   - Path existence is verified; the accuracy of statements about file contents is not.
+   - Claims relying on the existence of the runtime database file `local/sessions.db` have been dropped because the file was not found in the workspace.
+
+  asserted: CLI ran, task redacted, plan mode fixed, no yolo, three stage kinds present

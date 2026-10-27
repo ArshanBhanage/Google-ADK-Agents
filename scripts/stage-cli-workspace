@@ -18,7 +18,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DESTINATION = Path.home() / ".cache" / "adk-suite" / "cli-workspace"
-SOURCES = ("packages", "agents", "api", "scripts")
+# Deliberately narrow. The CLI reads the whole workspace, so every extra file costs
+# latency and tokens; these three trees are the shared runtime the demo asks about.
+SOURCES = ("packages", "api", "scripts")
 SKIP_DIRECTORIES = {".git", "node_modules", ".venv", "__pycache__", "dist", ".cache"}
 
 

@@ -8,8 +8,8 @@ No application or live integration is complete at initialization.
 | 0 | Runtime, configuration, auth/session foundation, API/UI, CI | PASSED | Local checks, persistent sessions, API/UI and dependency diagnostics |
 | A1 | Lead research architecture | PASSED | ADK load, real retrieval, schemas |
 | A2 | Lead research end-to-end | PASSED | Grounded live query, UI and matching CSV |
-| B1 | Restricted Gemini CLI tool | NOT_STARTED | Actual CLI invocation and negative tests |
-| B2 | CLI ADK pipeline | NOT_STARTED | Real trace and UI |
+| B1 | Restricted Gemini CLI tool | PASSED | Actual CLI invocation and negative tests |
+| B2 | CLI ADK pipeline | PASSED | Real trace and UI |
 | C1 | MCP tools | NOT_STARTED | Handshake and authorized issue search |
 | C2 | Bug workflow | NOT_STARTED | Evidence and approval boundaries |
 | D1 | Review analysis | NOT_STARTED | Real source/PR and deterministic diagnostics |
@@ -202,3 +202,31 @@ verbatim. Every other untrusted value is escaped by React, and outbound links ca
 `rel="noreferrer noopener"`.
 
 Gate A is complete. B1 is next; B–E remain unstarted.
+
+## B1 and B2 — PASSED 2026-10-27 (America/Los_Angeles)
+
+Full detail in `../agents/gemini_cli_tool/MILESTONES.md`; CLI behaviour findings in
+`technical-decisions.md`.
+
+- B1, `make verify-cli`: exit 0, `gemini_cli_version=0.65.0`, `backend=vertex_ai`,
+  `duration_ms=12411`. Evidence: `evidence/b1-cli-gate.txt`.
+- B2, `make verify-cli-pipeline`: `cli_actually_ran=True` with six labelled stages.
+  Evidence: `evidence/b2-pipeline-run.json`.
+- B2 end-to-end through the authenticated API: `422` for a 5-character question, `401`
+  without a credential, `422` for an unexpected field, then `200` in 107s with CLI exit
+  0 in 82s and argv `--approval-mode plan -o json -m gemini-3.6-flash -p <task>`. Five
+  paths verified present, one named path absent with the dependent claim dropped.
+  Evidence: `evidence/b2-api-e2e.txt`.
+- 112 unit tests pass. The Node pin is now enforced by `scripts/check-node`, which
+  caught the nvm default alias changing to Node 20 mid-session.
+
+Verification is **scoped**, not repository-wide: `make check` is red because of
+concurrent Part E work under `agents/ecommerce/` owned by another session, which this
+work has not touched. Two findings there, for its owner: ruff `E501` at
+`agents/ecommerce/database.py:44` and `:50`, and a detect-secrets `Basic Auth
+Credentials` report at `agents/ecommerce/tests/test_config.py:14`. Both will fail
+`make check` and CI for the whole repository until resolved.
+
+Gate order note: Part E exists in the working tree without C and D having started,
+which departs from the prompt's strict order. That work is not owned here and has been
+left untouched.

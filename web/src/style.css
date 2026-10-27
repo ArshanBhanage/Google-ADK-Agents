@@ -21,3 +21,14 @@ button.secondary { background: transparent; border: 1px solid currentColor; }
 .limitations > li::before { content: '!'; position: absolute; left: 0; font-weight: 700; }
 .queries > li { margin: 0.2rem 0; overflow-wrap: anywhere; }
 .suggestions { margin: 0.5rem 0; overflow-x: auto; }
+
+.stages { list-style: none; padding: 0; counter-reset: stage; }
+.stages > li { position: relative; padding: 0.6rem 0 0.6rem 2.2rem; border-left: 2px solid rgba(127, 127, 127, 0.4); margin-left: 0.6rem; }
+.stages > li::before { counter-increment: stage; content: counter(stage); position: absolute; left: -0.85rem; top: 0.7rem; width: 1.6rem; height: 1.6rem; border-radius: 50%; display: grid; place-items: center; font-size: 0.75rem; background: rgba(127, 127, 127, 0.25); }
+.stages > li.gemini_cli_subprocess { border-left-color: currentColor; }
+.stages > li.gemini_cli_subprocess::before { background: currentColor; color: Canvas; }
+.stages strong { display: block; }
+.invocation { display: grid; grid-template-columns: auto 1fr; gap: 0.3rem 1rem; margin: 0; }
+.invocation dt { font-weight: 600; }
+.invocation dd { margin: 0; overflow-wrap: anywhere; }
+pre.answer { white-space: pre-wrap; overflow-wrap: anywhere; background: rgba(127, 127, 127, 0.12); padding: 0.9rem; border-radius: 6px; font-family: inherit; }

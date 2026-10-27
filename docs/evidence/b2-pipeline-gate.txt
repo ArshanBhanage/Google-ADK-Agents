@@ -1,0 +1,10 @@
+# B2 live gate: ADK pipeline driving the real Gemini CLI
+# 2026-10-27T18:13:10Z
+
+$ make verify-cli-pipeline
+uv run --frozen python -m scripts.cli-pipeline-smoke
+events=6 cli_actually_ran=True
+stages=['cli_planner:adk_llm_agent', 'cli_executor:adk_llm_agent', 'inspect_workspace_with_gemini_cli:gemini_cli_subprocess', 'inspect_workspace_with_gemini_cli:gemini_cli_subprocess', 'cli_grounding:adk_deterministic_agent', 'cli_synthesiser:adk_llm_agent']
+grounded=False present=5 absent=1
+evidence=docs/evidence/b2-pipeline-run.json
+exit=
