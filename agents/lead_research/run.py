@@ -50,6 +50,9 @@ class ResearchTrace:
     prompt_tokens: int = 0
     output_tokens: int = 0
     thought_tokens: int = 0
+    # Google's grounding terms require displaying the returned Search Suggestions
+    # verbatim, so the provider's rendered markup is carried through to the UI.
+    search_entry_points: list[str] = field(default_factory=list)
 
     @property
     def used_google_search(self) -> bool:
@@ -76,6 +79,7 @@ class ResearchTrace:
                 "thought_tokens": self.thought_tokens,
                 "billable_searches": self.billable_searches,
             },
+            "search_entry_points": len(self.search_entry_points),
         }
 
 
@@ -96,6 +100,9 @@ def _collect(event: Any, trace: ResearchTrace) -> None:
             uri = getattr(getattr(chunk, "web", None), "uri", None)
             if uri and uri not in trace.grounding_sources:
                 trace.grounding_sources.append(uri)
+        rendered = getattr(metadata.search_entry_point, "rendered_content", None)
+        if rendered and rendered not in trace.search_entry_points:
+            trace.search_entry_points.append(rendered)
     for part in event.content.parts if event.content and event.content.parts else []:
         if part.function_call:
             trace.tool_invocations.append(
@@ -123,9 +130,17 @@ async def run_research(
 ) -> tuple[LeadReport, ResearchTrace]:
     """Execute the confirmed-criteria pipeline and return its deterministic report."""
     ensure_provider()
-    session = await session_service.create_session(
-        app_name=APP_NAME, user_id=user_id, session_id=session_id
-    )
+    # Reuse the caller's session when it already exists so the persisted report and the
+    # CSV served later come from one place and cannot drift apart.
+    session = None
+    if session_id:
+        session = await session_service.get_session(
+            app_name=APP_NAME, user_id=user_id, session_id=session_id
+        )
+    if session is None:
+        session = await session_service.create_session(
+            app_name=APP_NAME, user_id=user_id, session_id=session_id
+        )
     runner = Runner(app_name=APP_NAME, agent=build_pipeline(), session_service=session_service)
     trace = ResearchTrace(invocation_id=str(uuid.uuid4()))
     try:

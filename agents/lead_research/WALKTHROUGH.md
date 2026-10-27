@@ -52,3 +52,52 @@ No live company list, grounded response, CSV or evaluation transcript is supplie
 because none has been produced. The shared React results screen and CSV belong to
 A2 and cannot be demonstrated yet. Unblock with paid-tier billing on the key's
 project or credentials for another authorized real search API.
+
+## A2 — the authenticated application
+
+Prerequisites: `gcloud auth application-default login` completed, `GOOGLE_CLOUD_PROJECT`
+set in the local root `.env`, `GOOGLE_CLOUD_LOCATION=global`, a `LOCAL_ACCESS_TOKEN`
+of at least 32 characters, and `make probe-lead` printing `VERIFIED`.
+
+1. `make run-api` in one terminal, `make run-web` in another. Open the Vite URL.
+2. Choose **Deep research lead generation**. The readiness panel lists any unset
+   variable by name and never shows a value.
+3. Paste the `LOCAL_ACCESS_TOKEN` and press **Create session**. The session is
+   persisted in the real ADK `DatabaseSessionService` and owned by your identity.
+4. Fill industry, region, buyer profile and quantity. Press **Review criteria**, read
+   the restated criteria, then **Confirm and run live search**. The confirmation step
+   exists because each run issues real billable search queries; expect 60–120 seconds.
+5. Inspect the result. Each lead shows its score, confidence, the normalised domain,
+   the match explanation, and for every citation the quoted excerpt, the source link,
+   the retrieval timestamp and the SHA-256 of the response body. Open a citation link
+   and search the page for the quoted sentence: it is there, because a quote that the
+   fetched page does not contain is discarded before display.
+6. Read **Limitations**. It names candidates that could not be verified and why
+   (cross-origin redirect, robots crawl-delay, per-session retrieval budget), and how
+   many were discarded. An empty lead list with populated limitations is a correct
+   outcome, not a failure.
+7. Read **Google Search suggestions**, displayed as the grounding API returned them.
+   Showing these is required by Google's grounding terms.
+8. Read **Observed trace**: the model version, billable search count, token usage, the
+   search queries actually issued, each retrieval outcome, and the pages hashed.
+9. Press **Download CSV**. Open it and compare against the cards on screen. The file
+   is generated from the report persisted in session state, so the values match by
+   construction; `docs/evidence/a2-api-e2e.txt` records that assertion passing row for
+   row against a real run.
+
+### Failure paths worth demonstrating
+
+- Omit the credential, or use a wrong one: every agent route answers `401`.
+- Use another identity's session identifier: `404`, because ownership is derived
+  server-side and never taken from the request.
+- Request the CSV before running research: `409`, not an empty file.
+- Send `quantity: 0` or omit `industry`: `422` before any billable call.
+- If grounding is unavailable the route answers `503` carrying
+  `BLOCKED_PROVIDER_QUOTA`, so an outage cannot be mistaken for an empty result.
+
+### Measured, from a real run through the API
+
+`POST research` returned `200` in 95 seconds: 2 verified leads, 15 billable search
+queries, 4 pages retrieved and hashed, 3 search-suggestion blocks, and 54,348 prompt
+/ 4,626 output / 6,371 thinking tokens. Search queries dominate the cost, not tokens.
+Evidence: `../../docs/evidence/a2-api-e2e.txt`.

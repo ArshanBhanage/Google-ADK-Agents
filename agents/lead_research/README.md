@@ -1,12 +1,15 @@
 # A — Deep research lead generation
 
-Investigate prospective companies through Google Search and direct public sources.
+Investigate prospective companies through live Google Search and direct public
+sources, returning only leads whose cited excerpt appears in a page this service
+fetched and hashed itself.
 
-**A1 is BLOCKED, not passed.** The specialist architecture, typed schemas, the real
-website adapter and the deterministic ranking/qualification stage are implemented
-and covered by tests. The blocker is external: the configured API key answers plain
-generation but returns `429 RESOURCE_EXHAUSTED` for the built-in Google Search tool,
-so no grounded discovery run has succeeded. The results/export UI is gate A2.
+**A1 and A2 are PASSED and live-verified** on Vertex AI (`gemini-3.6-flash`,
+`location=global`). `make integration-lead` passes, and a real query through the
+authenticated API returned two Ohio machine shops with digest-pinned citations plus
+a CSV matching every displayed value. Three further candidates were reported
+unverified with specific reasons rather than dropped. Evidence is under
+`../../docs/evidence/`. Parts B–E have not been started.
 
 ```mermaid
 flowchart TD
@@ -36,12 +39,35 @@ make preflight-lead     # configuration only, no provider call
 make probe-lead         # real call: reports generation and grounding capability
 make verify-lead        # one real query; writes docs/evidence/a1-live-grounded-run.json
 make integration-lead   # live-marked gate assertions
-make run-adk
+make run-adk            # ADK web developer UI on 127.0.0.1:8001
 ```
 
-`probe-lead` currently exits 2 with `BLOCKED_SEARCH_GROUNDING`. `verify-lead` and
-`integration-lead` depend on it, so they refuse to run rather than produce a result
-that is not grounded in live search.
+For the authenticated application, run `make run-api` and `make run-web`, open the
+Vite URL, choose **Deep research lead generation**, paste your `LOCAL_ACCESS_TOKEN`,
+create a session, then fill the criteria form. The form requires an explicit
+confirmation step before anything is sent, because each run issues real billable
+search queries.
+
+## HTTP interface
+
+| Method | Path | Purpose |
+|---|---|---|
+| `GET` | `/api/readiness` | Per-provider configuration state. Never reports entitlement. |
+| `POST` | `/api/sessions` | Create a persistent ADK session owned by the caller. |
+| `POST` | `/api/agents/lead_research/{session_id}/research` | Run the pipeline in that session. |
+| `GET` | `/api/agents/lead_research/{session_id}/export.csv` | CSV of the persisted report. |
+
+Every agent path requires a bearer credential and resolves the owner server-side, so
+a session identifier alone grants nothing: another identity receives `404`. The
+request body is the `ResearchRequest` schema, rejected with `422` before any billable
+call if criteria are missing or out of range. A provider refusal returns `503` with
+the `BLOCKED_PROVIDER_QUOTA` guidance rather than an empty report, so an outage can
+never be mistaken for "no leads found". Exporting before a run returns `409`, not an
+empty file.
+
+The CSV is rendered from the report persisted in session state, which is the same
+object the UI received, so the two cannot drift apart. An end-to-end check asserts
+that row for row.
 
 Open http://127.0.0.1:8001 and select lead_research. ADK Web is an unauthenticated
 local developer tool: the command binds to loopback. The shared authenticated

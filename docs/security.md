@@ -21,3 +21,25 @@ Use TLS and a shared durable session database before remote deployment. Local
 SQLite stores conversation data on disk; `.local/` is ignored. Restrict its host
 permissions, delete sessions through the authenticated DELETE endpoint, and define
 retention before production use. API readiness lists missing names but never values.
+
+## Rendering Google Search Suggestions (A2)
+
+Grounding responses carry `groundingMetadata.searchEntryPoint.renderedContent`, and
+Google's grounding terms require displaying those suggestions. The React results page
+therefore injects that markup with `dangerouslySetInnerHTML` in `web/src/lead.tsx`.
+
+This is a deliberate exception to the rule that provider and tool output is untrusted
+data. The reasoning: the markup is first-party content from the Gemini API received
+over TLS, it is required verbatim for compliance, and sanitising it would break the
+rendering the terms oblige us to show. The exception is narrow — it applies only to
+this one field, and no other provider or page content is ever rendered as HTML.
+
+Everything else from the run is rendered as text or as an attribute. Citation
+excerpts, lead names, match explanations and retrieved URLs all come from untrusted
+web pages and are rendered through React's normal escaping. Outbound links carry
+`rel="noreferrer noopener"`. The CSV export separately neutralises spreadsheet
+formula injection, because a lead name scraped from a hostile page could otherwise
+begin with `=`, `+`, `-` or `@`; `tests/unit/test_lead_export.py` covers that.
+
+If the compliance position changes, the alternative is rendering the suggestion
+chips from the structured fields rather than the supplied markup.

@@ -7,7 +7,7 @@ No application or live integration is complete at initialization.
 |---|---|---|---|
 | 0 | Runtime, configuration, auth/session foundation, API/UI, CI | PASSED | Local checks, persistent sessions, API/UI and dependency diagnostics |
 | A1 | Lead research architecture | PASSED | ADK load, real retrieval, schemas |
-| A2 | Lead research end-to-end | NOT_STARTED | Grounded live query, UI and matching CSV |
+| A2 | Lead research end-to-end | PASSED | Grounded live query, UI and matching CSV |
 | B1 | Restricted Gemini CLI tool | NOT_STARTED | Actual CLI invocation and negative tests |
 | B2 | CLI ADK pipeline | NOT_STARTED | Real trace and UI |
 | C1 | MCP tools | NOT_STARTED | Handshake and authorized issue search |
@@ -156,3 +156,49 @@ Known deprecation: installed ADK warns that `GOOGLE_GENAI_USE_VERTEXAI` is super
 by `GOOGLE_GENAI_USE_ENTERPRISE`. Both are now exported.
 
 A2 is next. No part of B–E has been started.
+
+## A2 — PASSED 2026-10-27T07:12Z (America/Los_Angeles)
+
+User criteria through grounded research, qualification, cited results and CSV, behind
+authentication, with the UI and walkthrough complete.
+
+Implemented: `agents/lead_research/export.py`; two authenticated API routes; the React
+criteria form with an explicit confirmation step, results with per-citation excerpt,
+link, timestamp and digest, limitations, search suggestions and an observed trace;
+`tests/unit/test_lead_export.py` and `tests/unit/test_lead_api.py`.
+
+- `make check`: exit 0. **49 unit tests**, Ruff, mypy (17 files), TypeScript, secret
+  scan 0 findings, Vite build.
+- End-to-end against a running `make run-api`, recorded in
+  `evidence/a2-api-e2e.txt`:
+  - `GET /api/readiness` → 200, `status=CONFIGURED_NOT_VERIFIED`, `missing=[]`.
+  - `POST /api/sessions` with no credential → 401; with the credential → 201.
+  - `POST /api/agents/lead_research/{id}/research` → 200 in 95s. 2 verified leads,
+    15 billable searches, 4 pages retrieved and hashed, 3 search-suggestion blocks,
+    54,348 prompt / 4,626 output / 6,371 thinking tokens.
+  - `GET .../export.csv` → 200, `text/csv; charset=utf-8`, `cache-control: no-store`,
+    attachment filename set. **2 rows for 2 displayed leads, and name, domain, score,
+    source URLs and digests assert equal to the API response field for field.**
+  - `GET .../export.csv` before any run → 409, not an empty file.
+- Results were FM Machine Co. (`fmmachine.com`) and Wagner Machine, Inc.
+  (`wagnermachine.com`), each cited to a capability or equipment page fetched by this
+  code. Three candidates were reported unverified with specific reasons and one
+  discarded for failing excerpt matching.
+
+Two defects found and fixed during this gate:
+
+- Unit tests were not hermetic. `pydantic-settings` reads `os.environ` even with
+  `_env_file=None`, so a provider variable exported in the shell satisfied a Settings
+  object a test intended to leave unconfigured, and the readiness fail-closed
+  assertion passed or failed depending on the developer's shell. `tests/conftest.py`
+  now strips those variables for every test.
+- CSV export was vulnerable to spreadsheet formula injection, since lead names come
+  from untrusted pages. Values beginning `=`, `+`, `-`, `@` or a control character are
+  prefixed, with a test using a hostile `=HYPERLINK(...)` name.
+
+Security position recorded in `security.md`: the one place provider markup is rendered
+as HTML is the Search Suggestions block, which Google's grounding terms require
+verbatim. Every other untrusted value is escaped by React, and outbound links carry
+`rel="noreferrer noopener"`.
+
+Gate A is complete. B1 is next; B–E remain unstarted.

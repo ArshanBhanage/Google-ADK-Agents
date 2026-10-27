@@ -1,0 +1,22 @@
+# A2 end-to-end against the running API
+# 2026-10-27T07:11:28Z
+
+GET /api/readiness -> 200 status=CONFIGURED_NOT_VERIFIED gemini=CONFIGURED_NOT_VERIFIED missing=[]
+POST /api/sessions without credential -> 401 (expected 401)
+POST /api/sessions -> 201 id=da1554a2-d5f8-419d-ad40-57b592fabf7a
+POST research -> 200 in 95s  X-Billable-Searches=None
+  leads=2 searches=15 retrieved=4 suggestions=3
+  usage={'prompt_tokens': 54348, 'output_tokens': 4626, 'thought_tokens': 6371, 'billable_searches': 15}
+  * FM Machine Co. [fmmachine.com] score=70 source_retrieved
+      https://fmmachine.com/capabilities/ sha256=04b0166f03bc..
+  * Wagner Machine, Inc. [wagnermachine.com] score=70 source_retrieved
+      https://wagnermachine.com/equipment-list/ sha256=c8189898e038..
+  limitations:
+   - Midwest Machine Inc. (bestmmi.com), Rable Machine Inc. (rablemachineinc.com), and Pax Machine Works (paxmachine.com) could not be verified due to domain redirect restrictions or crawl delay policies encountered during public HTTP retrieval.
+   - Discarded 1 candidates without matching retrieved text and company name.
+   - Score measures source completeness, not proven commercial suitability.
+
+GET export.csv -> 200 None
+  None
+  rows=2 (UI leads=2)
+  CSV matches every UI value: name, domain, score, source urls, digests

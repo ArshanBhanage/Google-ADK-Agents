@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
+import { LeadResearch } from './lead';
 import './style.css';
 
 type Agent = { id: string; name: string; status: string };
@@ -47,12 +48,14 @@ function App() {
       </nav><p className="sidebar-note">Local development<br/>Evidence before completion.</p></aside>
     <main><header><span className="eyebrow">GOOGLE AGENT DEVELOPMENT KIT</span><span className="pill">Foundation · Verified locally</span></header>
       <h1>{selected ? selected.name.slice(4) : 'Five workflows. Verifiable results.'}</h1>
-      <p className="intro">{selected ? (selected.id === 'lead_research' ? 'A1 architecture is implemented. Live search verification is blocked pending Gemini configuration. Use make run-adk after configuration; results UI follows at gate A2.' : 'This agent has not started. The authenticated session service is available for foundation verification.') : 'Research, tools, debugging, review and commerce. Each application advances only after its milestone gate is verified.'}</p>
+      <p className="intro">{selected ? (selected.id === 'lead_research' ? 'Grounded discovery over live Google Search, with every lead backed by an excerpt from a page this service fetched and hashed itself. Unverifiable candidates are reported, not dropped silently.' : 'This agent has not started. The authenticated session service is available for foundation verification.') : 'Research, tools, debugging, review and commerce. Each application advances only after its milestone gate is verified.'}</p>
       {error && <div className="error" role="alert">{error}</div>}
       {!status && !error && <p role="status">Checking the API…</p>}
       {status && <>
         <section className="connection"><div><span className="eyebrow">CONNECTION READINESS</span><h2>{status.status.replaceAll('_', ' ')}</h2><p>Credential presence does not prove provider connectivity.</p></div><div><strong>Missing configuration</strong><ul>{status.missing.map(field => <li key={field}><code>{field}</code></li>)}</ul>{!status.missing.length && <p>Configured; live verification still pending.</p>}</div></section>
-        {selected ? <section className="panel"><h2>Verify a persistent session</h2><p>Use your local access token or an authorized Google ID token. It stays in this page’s memory.</p><label htmlFor="token">Access credential</label><input id="token" type="password" value={token} onChange={event => setToken(event.target.value)} autoComplete="off"/><button onClick={createSession} disabled={!token || pending}>{pending ? 'Creating…' : 'Create session'}</button>{session && <p role="status">Session created: <code>{session}</code>. Agent execution is not implemented.</p>}</section>
+        {selected ? <><section className="panel"><h2>Authenticate this session</h2><p>Use your local access token or an authorized Google ID token. It stays in this page’s memory.</p><label htmlFor="token">Access credential</label><input id="token" type="password" value={token} onChange={event => setToken(event.target.value)} autoComplete="off"/><button onClick={createSession} disabled={!token || pending}>{pending ? 'Creating…' : 'Create session'}</button>{session && <p role="status">Session created: <code>{session}</code>. It is scoped to your identity; another user cannot read it.</p>}</section>
+          {selected.id === 'lead_research' && session && <LeadResearch token={token} session={session}/>}
+          {selected.id !== 'lead_research' && <p>Agent execution is not implemented for this part.</p>}</>
           : <section className="grid" aria-label="Agent milestones">{status.agents.map(agent => <a className="card" key={agent.id} href={`#${agent.id}`}><span className="eyebrow">PART {agent.name[0]}</span><h2>{agent.name.slice(4)}</h2><span className="state">{agent.status.replaceAll('_', ' ')}</span><span className="arrow" aria-hidden="true">↗</span></a>)}</section>}
       </>}
       <footer>No live results, exports or deployment are claimed. Status reflects the current implementation.</footer>

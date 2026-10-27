@@ -9,7 +9,7 @@ live model execution, cloud deployment or public GitHub submission is claimed.
 
 | Part | Intended capability | Status |
 |---|---|---|
-| A | Evidence-backed lead research and export | [A1 blocked: no Google Search grounding quota on the configured key](agents/lead_research/README.md); A2 not started |
+| A | Evidence-backed lead research and export | [A1 and A2 passed, live-verified on Vertex AI](agents/lead_research/README.md) |
 | B | Real Gemini CLI tool in an ADK pipeline | Not started |
 | C | MCP issue investigation | Not started |
 | D | Grounded code review and isolated tests | Not started |
