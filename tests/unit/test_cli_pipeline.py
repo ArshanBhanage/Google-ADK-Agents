@@ -85,10 +85,11 @@ def test_invented_paths_are_reported_and_sink_the_verdict(tmp_path: Path) -> Non
     assert any("do not exist" in line for line in verdict.limitations)
 
 
-def test_a_bare_filename_is_located_before_being_called_absent(tmp_path: Path) -> None:
+def test_a_bare_filename_is_located_and_reported_with_its_real_path(tmp_path: Path) -> None:
     root = workspace(tmp_path)
     verdict = check_grounding("The entry point is main.py.", root)
-    assert verdict.paths_present == ["main.py"]
+    # Resolved to where the file actually is, rather than echoed back bare.
+    assert verdict.paths_present == ["api/main.py"]
     assert verdict.grounded is True
 
 
@@ -97,3 +98,41 @@ def test_an_answer_naming_nothing_is_not_treated_as_grounded(tmp_path: Path) -> 
     assert verdict.grounded is False
     assert verdict.paths_claimed == []
     assert any("named no file" in line for line in verdict.limitations)
+
+
+def test_absolute_paths_inside_the_workspace_are_verified_not_failed(tmp_path: Path) -> None:
+    """Regression: the CLI reports absolute paths on some runs.
+
+    An earlier extractor sliced an absolute path at a mid-path segment, producing a
+    relative path that did not exist, so four real files were reported absent and a
+    correct answer was discredited.
+    """
+    root = workspace(tmp_path)
+    answer = (
+        f"Settings live in {root}/packages/agent_core/config.py "
+        f"and the routes in {root}/api/main.py."
+    )
+    claimed = extract_paths(answer)
+    assert all(claim.startswith("/") for claim in claimed), claimed
+
+    verdict = check_grounding(answer, root)
+    assert verdict.grounded is True
+    assert verdict.paths_absent == []
+    # Reported back workspace-relative, so host paths are not echoed to the user.
+    assert set(verdict.paths_present) == {"packages/agent_core/config.py", "api/main.py"}
+
+
+def test_an_absolute_path_outside_the_workspace_is_still_refused(tmp_path: Path) -> None:
+    root = workspace(tmp_path)
+    other = tmp_path.parent / "elsewhere.py"
+    other.write_text("x = 1\n")
+    verdict = check_grounding(f"See {other} for details.", root)
+    assert verdict.paths_present == []
+    assert verdict.paths_absent == [str(other)]
+    assert verdict.grounded is False
+
+
+def test_the_same_file_named_twice_in_two_forms_counts_once(tmp_path: Path) -> None:
+    root = workspace(tmp_path)
+    verdict = check_grounding(f"Both api/main.py and {root}/api/main.py are the same module.", root)
+    assert verdict.paths_present == ["api/main.py"]
