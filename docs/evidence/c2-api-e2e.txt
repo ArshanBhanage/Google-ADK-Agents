@@ -1,0 +1,33 @@
+# C2 end-to-end against the running API
+# 2026-10-29T06:03:28Z
+# GITHUB_WRITE_ENABLED=false throughout; no issue is created anywhere
+
+POST /api/sessions -> 201 id=1e4d8079-ea93-4f0d-8023-9efb6d0c8f18
+triage, no credential -> 401 Bearer authentication required
+triage, 5-char description -> 422 [{'type': 'string_too_short', 'loc': ['body', 'description'], 'msg': '
+FILE with no approval -> 403 BLOCKED_NO_APPROVAL: no approval was requested for this session
+
+POST triage -> 200 in 56s
+  mcp_actually_used=True repository=google/adk-python
+  issues_searched=14 verified=1 discarded=0
+  severity=high
+  duplicate #7800 [open] https://github.com/google/adk-python/issues/7800
+  stages:
+    adk_llm_agent              issue_triage                 ran
+    mcp_tool_call              search_repository_issues     called
+    mcp_tool_call              search_repository_issues     COMPLETED
+    mcp_tool_call              search_repository_issues     called
+    mcp_tool_call              search_repository_issues     COMPLETED
+    mcp_tool_call              search_repository_issues     called
+    mcp_tool_call              search_repository_issues     COMPLETED
+    adk_deterministic_agent    issue_verifier               ran
+    adk_llm_agent              issue_drafter                ran
+
+  approval offered: token_len=43 sha256=6d7b61c468badb15…
+  repository bound: google/adk-python
+  write_path_blocked_by=['GITHUB_WRITE_ENABLED']
+
+  real approval + edited title -> 403 BLOCKED_CONTENT_CHANGED: the issue content differs from what
+  matching approval, write disabled -> 409 BLOCKED_WRITE_DISABLED: the write path is off. To enable it set GITHUB_WRITE_ENA
+
+  asserted: MCP used, all three stage kinds present, every unauthorized write refused

@@ -10,8 +10,8 @@ No application or live integration is complete at initialization.
 | A2 | Lead research end-to-end | PASSED | Grounded live query, UI and matching CSV |
 | B1 | Restricted Gemini CLI tool | PASSED | Actual CLI invocation and negative tests |
 | B2 | CLI ADK pipeline | PASSED | Real trace and UI |
-| C1 | MCP tools | NOT_STARTED | Handshake and authorized issue search |
-| C2 | Bug workflow | NOT_STARTED | Evidence and approval boundaries |
+| C1 | MCP tools | PASSED | Handshake and authorized issue search |
+| C2 | Bug workflow | PASSED | Evidence and approval boundaries |
 | D1 | Review analysis | NOT_STARTED | Real source/PR and deterministic diagnostics |
 | D2 | Review pipeline | NOT_STARTED | Grounded review and isolation controls |
 | E1 | Merchant/AlloyDB/Toolbox | NOT_STARTED | Real catalog sync and MCP query |
@@ -230,3 +230,35 @@ Credentials` report at `agents/ecommerce/tests/test_config.py:14`. Both will fai
 Gate order note: Part E exists in the working tree without C and D having started,
 which departs from the prompt's strict order. That work is not owned here and has been
 left untouched.
+
+## C1 and C2 — PASSED 2026-10-29 (America/Los_Angeles)
+
+Full detail in `../agents/bug_assistant/MILESTONES.md`.
+
+- C1, `make verify-bug`: `handshake_ms=1891`, 6 tools advertised and admitted over
+  Streamable HTTP to `https://api.githubcopilot.com/mcp/x/issues/readonly`, no write
+  tool present, then a real lookup in 1220 ms. Unconfigured it exits 2 with
+  `BLOCKED_GITHUB_TOKEN`. Evidence: `evidence/c1-mcp-gate.txt`.
+- C2 end-to-end, `evidence/c2-api-e2e.txt`: `POST triage` 200 in 56 s over three real
+  MCP search calls, 14 issues searched, severity high, one verified duplicate
+  `google/adk-python#7800` — independently confirmed with `gh issue view` as OPEN with
+  the same title and URL.
+- Authorization negatives all observed: `401` without a credential, `404` for another
+  identity's or another agent's session, `422` for invalid input,
+  `403 BLOCKED_NO_APPROVAL` for a forged write, `403 BLOCKED_CONTENT_CHANGED` for a
+  real approval with the title edited, and `409 BLOCKED_WRITE_DISABLED` for a matching
+  approval while writes are off.
+- 190 unit tests pass, 67 of them for Part C.
+
+Part C credentials live in `agents/bug_assistant/.env` through a component-scoped
+`BugSettings`, which is where the deliverable contract puts component-specific secrets.
+The shared root `Settings` no longer owns a GitHub token.
+
+No issue has been created in any repository. The optional write proof is left for an
+explicit decision rather than manufacturing evidence with a spam ticket.
+
+Verification remains **scoped**, not repository-wide: `make check` is red from
+concurrent Part E work under `agents/ecommerce/`, owned by another session and untouched
+here. Its two blockers for that owner are unchanged: ruff `E501` at
+`agents/ecommerce/database.py:44` and `:50`, and a detect-secrets `Basic Auth
+Credentials` report at `agents/ecommerce/tests/test_config.py:14`.

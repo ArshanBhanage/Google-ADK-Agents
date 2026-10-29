@@ -11,7 +11,7 @@ live model execution, cloud deployment or public GitHub submission is claimed.
 |---|---|---|
 | A | Evidence-backed lead research and export | [A1 and A2 passed, live-verified on Vertex AI](agents/lead_research/README.md) |
 | B | Real Gemini CLI tool in an ADK pipeline | [B1 and B2 passed, real CLI subprocess live-verified](agents/gemini_cli_tool/README.md) |
-| C | MCP issue investigation | Not started |
+| C | MCP issue investigation | [C1 and C2 passed, real MCP issue triage live-verified](agents/bug_assistant/README.md) |
 | D | Grounded code review and isolated tests | Not started |
 | E | Shopify catalog, AlloyDB/Toolbox and checkout | Not started |
 

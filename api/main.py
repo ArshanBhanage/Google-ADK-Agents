@@ -7,9 +7,30 @@ from contextlib import asynccontextmanager
 from typing import Annotated, Any, Literal
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response
+from google.adk.events import Event, EventActions
 from google.adk.sessions import DatabaseSessionService
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
+from agents.bug_assistant.config import BugSettings
+from agents.bug_assistant.mcp import McpUnavailable
+from agents.bug_assistant.models import (
+    BugTriageRequest,
+    CreatedIssue,
+    ProposedIssue,
+    VerifiedTriage,
+)
+from agents.bug_assistant.run import PipelineError as BugPipelineError
+from agents.bug_assistant.run import ProviderBlocked as BugProviderBlocked
+from agents.bug_assistant.run import run_triage
+from agents.bug_assistant.writes import (
+    GRANT_TTL_SECONDS,
+    STATE_KEY,
+    ApprovalGrant,
+    ApprovalRequired,
+    authorize,
+    create_issue,
+    mint_grant,
+)
 from agents.gemini_cli_tool.models import CliAnswer, CliPlan, CliRequest, GroundingCheck
 from agents.gemini_cli_tool.run import PipelineError as CliPipelineError
 from agents.gemini_cli_tool.run import ProviderBlocked as CliProviderBlocked
@@ -63,6 +84,32 @@ class StageView(BaseModel):
     kind: str
     outcome: str
     detail: str
+
+
+class ApprovalOffer(BaseModel):
+    """An offer to write, not a permission. Spending it requires presenting it back
+    alongside the unchanged content it was minted for."""
+
+    approval_token: str
+    content_sha256: str
+    repository: str
+    expires_in_seconds: int
+    write_path_blocked_by: list[str]
+
+
+class IssueWriteRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    approval_token: str = Field(min_length=16, max_length=256)
+    proposed_issue: ProposedIssue
+
+
+class TriageResponse(BaseModel):
+    triage: VerifiedTriage
+    proposed_issue: ProposedIssue | None
+    approval: ApprovalOffer | None
+    stages: list[StageView]
+    mcp_actually_used: bool
+    usage: UsageView
 
 
 class CliInspectResponse(BaseModel):
@@ -161,6 +208,133 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 for key, value in AGENTS.items()
             ],
         )
+
+    async def remember(
+        agent: AgentName, session_id: str, subject: str, delta: dict[str, Any]
+    ) -> None:
+        """Persist a state change outside a runner, e.g. an approval grant."""
+        session = await sessions.get_session(app_name=agent, user_id=subject, session_id=session_id)
+        if session is None:
+            raise HTTPException(404, "Session not found")
+        await sessions.append_event(
+            session,
+            Event(
+                author="api",
+                invocation_id=str(uuid.uuid4()),
+                actions=EventActions(state_delta=delta),
+            ),
+        )
+
+    @application.post(
+        "/api/agents/bug_assistant/{session_id}/triage", response_model=TriageResponse
+    )
+    async def triage(
+        session_id: uuid.UUID,
+        body: BugTriageRequest,
+        user: Annotated[Identity, Depends(identity)],
+    ) -> TriageResponse:
+        """Read-only triage. Offers an approval for a write but grants nothing."""
+        await get_session("bug_assistant", session_id, user)
+        started = time.monotonic()
+        try:
+            verified, draft, trace = await run_triage(
+                body,
+                session_service=sessions,
+                user_id=user.subject,
+                session_id=str(session_id),
+            )
+        except BugProviderBlocked as exc:
+            raise HTTPException(503, str(exc)) from exc
+        except BugPipelineError as exc:
+            raise HTTPException(502, str(exc)) from exc
+
+        grant = None
+        write_blocked = BugSettings().write_missing()
+        if draft is not None:
+            try:
+                minted = mint_grant(draft, user.subject)
+            except McpUnavailable as exc:
+                raise HTTPException(409, str(exc)) from exc
+            await remember(
+                "bug_assistant", str(session_id), user.subject, {STATE_KEY: minted.as_dict()}
+            )
+            grant = ApprovalOffer(
+                approval_token=minted.token,
+                content_sha256=minted.content_sha256,
+                repository=minted.repository,
+                expires_in_seconds=int(GRANT_TTL_SECONDS),
+                write_path_blocked_by=write_blocked,
+            )
+        logger.info(
+            json.dumps(
+                {
+                    "agent": "bug_assistant",
+                    "session": str(session_id),
+                    "duration_ms": round((time.monotonic() - started) * 1000),
+                    "mcp_used": trace.mcp_actually_used,
+                    "issues_searched": verified.issues_searched,
+                    "verified_duplicates": len(verified.verified_duplicates),
+                }
+            )
+        )
+        return TriageResponse(
+            triage=verified,
+            proposed_issue=draft,
+            approval=grant,
+            stages=[
+                StageView(name=s.name, kind=s.kind, outcome=s.outcome, detail=s.detail)
+                for s in trace.stages
+            ],
+            mcp_actually_used=trace.mcp_actually_used,
+            usage=UsageView(
+                prompt_tokens=trace.prompt_tokens,
+                output_tokens=trace.output_tokens,
+                thought_tokens=trace.thought_tokens,
+                billable_searches=0,
+            ),
+        )
+
+    @application.post(
+        "/api/agents/bug_assistant/{session_id}/create-issue", response_model=CreatedIssue
+    )
+    async def create_issue_route(
+        session_id: uuid.UUID,
+        body: IssueWriteRequest,
+        user: Annotated[Identity, Depends(identity)],
+    ) -> CreatedIssue:
+        """The only mutating route in the suite. Requires a matching approval grant."""
+        session = await sessions.get_session(
+            app_name="bug_assistant", user_id=user.subject, session_id=str(session_id)
+        )
+        if session is None:
+            raise HTTPException(404, "Session not found")
+        stored = session.state.get(STATE_KEY)
+        grant = ApprovalGrant.from_dict(stored) if isinstance(stored, dict) else None
+        try:
+            authorize(grant, body.approval_token, body.proposed_issue, user.subject)
+        except ApprovalRequired as exc:
+            raise HTTPException(403, str(exc)) from exc
+        assert grant is not None  # authorize() rejects None before this point
+        # Burn the grant before the write, so a failed attempt cannot be retried blind.
+        grant.used = True
+        await remember("bug_assistant", str(session_id), user.subject, {STATE_KEY: grant.as_dict()})
+        try:
+            created = await create_issue(body.proposed_issue)
+        except ApprovalRequired as exc:
+            raise HTTPException(409, str(exc)) from exc
+        except McpUnavailable as exc:
+            raise HTTPException(502, str(exc)) from exc
+        logger.info(
+            json.dumps(
+                {
+                    "agent": "bug_assistant",
+                    "session": str(session_id),
+                    "action": "issue_created",
+                    "number": created.number,
+                }
+            )
+        )
+        return created
 
     @application.post(
         "/api/agents/gemini_cli_tool/{session_id}/inspect", response_model=CliInspectResponse
