@@ -6,11 +6,12 @@ from pathlib import Path
 from detect_secrets import SecretsCollection
 from detect_secrets.settings import default_settings
 
-# Recorded evidence pins each citation to the SHA-256 of the public page body that was
-# actually fetched. Those digests are the proof the gate rests on, not credentials, and
-# detect-secrets reports them as high-entropy hex. The exemption is deliberately narrow:
-# only under docs/evidence/, only this plugin, and only a 64-hex value on a *sha256 key.
-PUBLISHED_DIGEST = re.compile(r'"[a-z_]*sha256"\s*:\s*"[0-9a-f]{64}"')
+# Recorded evidence pins each claim to a public identifier: the SHA-256 of a page body
+# that was fetched, or the git commit SHA a pull request was analysed at. Those are the
+# proof the gates rest on, not credentials, and detect-secrets reports them as
+# high-entropy hex. The exemption is deliberately narrow: only under docs/evidence/,
+# only this plugin, and only a 40-to-64 hex value on a key ending in sha or sha256.
+PUBLISHED_DIGEST = re.compile(r'"[a-z_]*sha(?:256)?"\s*:\s*"[0-9a-f]{40,64}"')
 DIGEST_PLUGIN = "Hex High Entropy String"
 
 
