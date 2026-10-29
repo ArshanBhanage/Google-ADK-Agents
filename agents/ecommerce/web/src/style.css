@@ -1,0 +1,262 @@
+:root {
+  font-family: Inter, Arial, sans-serif;
+  color: #1b312b;
+  background: #f5f4ed;
+  font-synthesis: none;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+header {
+  padding: 26px 5%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #d9ddd3;
+}
+.brand {
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-decoration: none;
+  color: inherit;
+}
+.brand span {
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.badge,
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 2px;
+  font-weight: 700;
+}
+.badge {
+  border: 1px solid #bdcbbf;
+  border-radius: 20px;
+  padding: 9px 14px;
+}
+main {
+  max-width: 1400px;
+  margin: auto;
+  padding: 0 5%;
+}
+.hero {
+  padding: 50px 0 32px;
+  max-width: 680px;
+}
+.hero h1 {
+  font-family: Georgia, serif;
+  font-size: 64px;
+  line-height: 1.05;
+  font-weight: 400;
+  margin: 15px 0;
+}
+.hero em {
+  color: #617360;
+}
+.hero > p:last-child {
+  max-width: 530px;
+  line-height: 1.7;
+  color: #617069;
+}
+.panel {
+  background: #fff;
+  border: 1px solid #dce0d6;
+  border-radius: 16px;
+  padding: 28px;
+}
+h2 {
+  font-family: Georgia, serif;
+  font-size: 26px;
+  font-weight: 400;
+  margin-top: 0;
+}
+button,
+.checkout {
+  background: #243e32;
+  color: white;
+  border: 0;
+  border-radius: 7px;
+  padding: 12px 18px;
+  cursor: pointer;
+  font-size: 14px;
+  display: inline-block;
+}
+button:disabled {
+  opacity: 0.45;
+  cursor: wait;
+}
+button:hover:not(:disabled) {
+  background: #385b46;
+}
+input,
+textarea {
+  border: 1px solid #bbc8be;
+  border-radius: 7px;
+  background: #fafbf8;
+  padding: 13px;
+  width: 100%;
+  font: inherit;
+  color: inherit;
+}
+textarea {
+  min-height: 90px;
+  resize: vertical;
+  margin-bottom: 12px;
+}
+label {
+  font-size: 13px;
+  display: block;
+}
+label input {
+  margin: 8px 0 14px;
+}
+.login {
+  max-width: 580px;
+}
+.login p,
+.empty {
+  line-height: 1.6;
+  color: #69766f;
+}
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 28px;
+}
+.cart {
+  align-self: start;
+  position: sticky;
+  top: 20px;
+}
+.session,
+.section-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 20px 0;
+}
+.quiet {
+  color: #385b46;
+  background: transparent;
+  padding: 6px 0;
+  text-decoration: underline;
+}
+.quiet:hover:not(:disabled) {
+  background: transparent;
+}
+.answer {
+  white-space: pre-wrap;
+  line-height: 1.7;
+  margin-top: 22px;
+  border-top: 1px solid #dde1d9;
+  padding-top: 20px;
+}
+.meta,
+.section-title span {
+  font-size: 12px;
+  color: #6b7971;
+  line-height: 1.6;
+}
+.catalog {
+  margin-top: 32px;
+}
+.search {
+  display: flex;
+  gap: 8px;
+}
+.products {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 20px;
+}
+.product {
+  border: 1px solid #d9dfd4;
+  border-radius: 12px;
+  overflow: hidden;
+  background: white;
+}
+.product img {
+  width: 100%;
+  height: 220px;
+  object-fit: contain;
+  background: #f0f1eb;
+}
+.product-body {
+  padding: 20px;
+}
+.product h3 {
+  font-size: 18px;
+  margin: 6px 0 14px;
+  line-height: 1.4;
+}
+.price {
+  font-weight: 700;
+}
+.line {
+  padding: 15px 0;
+  border-bottom: 1px solid #e1e5de;
+}
+.line p {
+  font-size: 13px;
+  color: #6b7971;
+}
+.total {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.checkout {
+  margin-top: 12px;
+  background: #527246;
+  font-size: 13px;
+}
+.status {
+  padding: 15px 0;
+  font-size: 13px;
+}
+footer {
+  padding: 25px 0;
+  border-top: 1px solid #d9ddd3;
+  color: #778379;
+  font-size: 12px;
+}
+.sr {
+  position: absolute;
+  left: -9999px;
+}
+hr {
+  border: 0;
+  border-top: 1px solid #dde1d9;
+  margin-top: 22px;
+}
+@media (max-width: 850px) {
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+  .cart {
+    position: static;
+  }
+  .hero h1 {
+    font-size: 48px;
+  }
+  .badge {
+    display: none;
+  }
+}
+@media (max-width: 500px) {
+  .products {
+    grid-template-columns: 1fr;
+  }
+  .panel {
+    padding: 20px;
+  }
+  .brand span {
+    display: none;
+  }
+}

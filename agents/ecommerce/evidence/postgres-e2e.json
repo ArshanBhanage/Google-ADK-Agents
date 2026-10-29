@@ -1,0 +1,21 @@
+{
+  "checked_at": "2026-10-28T23:16:32.758275+00:00",
+  "mode": "local_postgres",
+  "products": 15,
+  "variants": 24,
+  "mcp_catalog_rows": 1,
+  "create_idempotent": true,
+  "confirmation_enforced": true,
+  "cross_user_read_and_write_denied": true,
+  "add_idempotent": true,
+  "real_checkout_url_received": true,
+  "payment_attempted": false,
+  "test_item_removed": true,
+  "unauthorized_order_access_blocked": true,
+  "vertex_adk_tools": [
+    "search_catalog",
+    "get_product_details"
+  ],
+  "vertex_answer_received": true,
+  "catalog_provenance": "Authorized Shopify API records; demo-style catalog, production provenance unverified"
+}

@@ -1,0 +1,11 @@
+{
+  "status": "PASSED",
+  "catalog_rendered": true,
+  "confirmed_add": true,
+  "checkout_link_received": true,
+  "item_removed": true,
+  "signout_clears_token": true,
+  "mobile_width": 390,
+  "page_errors": [],
+  "checked_at": "2026-10-28T23:17:30.890Z"
+}

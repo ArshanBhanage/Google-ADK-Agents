@@ -1,0 +1,10 @@
+{
+  "checked_on": "2026-10-28",
+  "status": "SHOPIFY_CATALOG_READ_VERIFIED",
+  "products": 15,
+  "variants": 24,
+  "source_ids_validated": true,
+  "database_sync": "NOT_RUN: ALLOYDB_DATABASE_URL missing",
+  "cloud_mcp": "NOT_RUN: TOOLBOX_URL missing",
+  "note": "Live read from the configured Shopify store. No credentials or product content retained. Catalog provenance beyond the authorized API response has not been independently verified."
+}

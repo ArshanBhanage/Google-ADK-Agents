@@ -2,7 +2,7 @@ UV ?= uv
 NPM ?= npm
 export UV_CACHE_DIR ?= $(CURDIR)/.cache/uv
 
-.PHONY: setup lint typecheck test check run-api run-web check-secrets check-container check-node setup-gemini-cli preflight-cli verify-cli verify-cli-pipeline preflight-bug verify-bug verify-triage preflight-review verify-review verify-review-pipeline
+.PHONY: setup lint typecheck test check run-api run-web check-secrets check-container check-node check-ecommerce verify-all setup-gemini-cli preflight-cli verify-cli verify-cli-pipeline preflight-bug verify-bug verify-triage preflight-review verify-review verify-review-pipeline
 setup:
 	$(UV) sync --locked
 	$(NPM) --prefix web ci
@@ -13,7 +13,10 @@ lint:
 check-node:
 	./scripts/check-node
 typecheck: check-node
-	$(UV) run --frozen mypy packages api agents
+	# agents/ecommerce is a self-contained component with its own pyproject, lockfile
+	# and stricter mypy settings. It is checked by `make check-ecommerce`, which runs
+	# its own configuration, rather than under this one.
+	$(UV) run --frozen mypy packages api agents --exclude 'agents/ecommerce'
 	$(NPM) --prefix web run typecheck
 test:
 	$(UV) run --frozen pytest -m 'not live'
@@ -62,3 +65,14 @@ verify-review:
 	$(UV) run --frozen python -m scripts.review-preflight --pr $(PR)
 verify-review-pipeline:
 	$(UV) run --frozen python -m scripts.review-smoke $(PR)
+
+check-ecommerce:
+	$(MAKE) -C agents/ecommerce check
+verify-all: check check-ecommerce
+	@echo "Part A: make probe-lead && make verify-lead && make integration-lead"
+	@echo "Part B: make verify-cli && make verify-cli-pipeline"
+	@echo "Part C: make verify-bug && make verify-triage BUG_REPO=<owner/repo>"
+	@echo "Part D: make verify-review PR=<owner/repo#n> && make verify-review-pipeline PR=<owner/repo#n>"
+	@echo "Part D sandbox: $(UV) run --frozen pytest -m live tests/integration/test_sandbox_live.py"
+	@echo "Part E: make -C agents/ecommerce local-check (and live-check with credentials)"
+	@echo "Each live target costs real provider usage; run them deliberately, not in CI."

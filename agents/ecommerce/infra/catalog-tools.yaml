@@ -1,0 +1,53 @@
+kind: tool
+name: search_catalog
+type: postgres-sql
+source: commerce-db
+description: >-
+  Search the authorized merchant's imported catalog using PostgreSQL lexical full-text
+  search. Results are snapshots with sync timestamps, not guaranteed live inventory.
+  No rows means no matching imported products. Never invent products.
+parameters:
+  - name: query
+    type: string
+    description: Search words, not SQL. Maximum 300 characters.
+statement: |
+  SELECT p.source_id AS product_id, p.title, p.vendor, p.url,
+         v.source_id AS variant_id, v.title AS variant_title,
+         v.amount, v.currency, v.available, v.image_url,
+         p.updated_at AS catalog_synced_at
+  FROM commerce.products p JOIN commerce.variants v
+    ON p.merchant=v.merchant AND p.source_id=v.product_id
+  WHERE p.merchant='${SHOPIFY_STORE_DOMAIN}' AND p.active AND v.active
+    AND length($1) BETWEEN 1 AND 300
+    AND p.search_document @@ plainto_tsquery('simple', $1)
+  ORDER BY ts_rank(p.search_document, plainto_tsquery('simple', $1)) DESC,
+           p.source_id, v.source_id
+  LIMIT 20
+---
+kind: tool
+name: get_product_details
+type: postgres-sql
+source: commerce-db
+description: >-
+  Read a product and its variants using the exact Shopify product ID from search_catalog.
+  Returns merchant-sourced prices, currency and availability snapshot. Do not guess IDs.
+parameters:
+  - name: product_id
+    type: string
+    description: Exact gid://shopify/Product/... identifier returned by search_catalog.
+statement: |
+  SELECT p.source_id AS product_id, p.title, p.description, p.vendor, p.url,
+         v.source_id AS variant_id, v.title AS variant_title, v.sku,
+         v.amount, v.currency, v.available, v.image_url,
+         p.updated_at AS catalog_synced_at
+  FROM commerce.products p JOIN commerce.variants v
+    ON p.merchant=v.merchant AND p.source_id=v.product_id
+  WHERE p.merchant='${SHOPIFY_STORE_DOMAIN}' AND p.source_id=$1
+    AND p.active AND v.active
+  ORDER BY v.source_id LIMIT 100
+---
+kind: toolset
+name: catalog
+tools:
+  - search_catalog
+  - get_product_details

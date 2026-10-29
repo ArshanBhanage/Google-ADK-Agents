@@ -1,0 +1,10 @@
+kind: source
+name: commerce-db
+type: alloydb-postgres
+project: ${GOOGLE_CLOUD_PROJECT}
+region: ${ALLOYDB_REGION}
+cluster: ${ALLOYDB_CLUSTER}
+instance: ${ALLOYDB_INSTANCE}
+database: ${DB_NAME}
+user: ${DB_USER}
+ipType: private

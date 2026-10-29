@@ -1,0 +1,31 @@
+[project]
+name = "adk-ecommerce"
+version = "0.1.0"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "google-adk[db,mcp]==2.13.0",
+  "psycopg[binary,pool]",
+  "pydantic-settings",
+  "httpx",
+  "fastapi",
+  "uvicorn",
+]
+[dependency-groups]
+dev = ["pytest", "pytest-asyncio", "ruff", "mypy"]
+[tool.uv]
+package = false
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+pythonpath = ["../.."]
+markers = ["live: uses real external dependencies"]
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+[tool.mypy]
+plugins = ["pydantic.mypy"]
+python_version = "3.12"
+strict = true
+ignore_missing_imports = true

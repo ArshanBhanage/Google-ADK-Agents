@@ -1,0 +1,15 @@
+{
+  "status": "MCP_QUERY_VERIFIED",
+  "server": "Toolbox",
+  "version": "1.15.0+binary.darwin.arm64.8e8e569",
+  "tools": ["get_product_details", "search_catalog"],
+  "result_blocks": 0,
+  "database_mode": "local_postgres",
+  "postgres_version": "17.11 (Debian 17.11-1.pgdg13+2)",
+  "product_rows": 0,
+  "migrations_idempotent": true,
+  "forbidden_queries_denied": 2,
+  "merchant_gate": "BLOCKED: no authorized Shopify store or AlloyDB",
+  "checked_at_unix": 1793123790,
+  "postgres_image": "postgres@sha256:b8faeff7712663c2773a190181e1246e37e364b887611c04658c28b44e2408fe"
+}

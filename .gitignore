@@ -18,3 +18,15 @@ dist/
 .DS_Store
 playwright-report/
 test-results/
+# Rule 11: generated binary recordings are not committed.
+*.mp4
+*.mov
+*.aiff
+*.wav
+# Finder-duplicated copies that the plain patterns above do not match.
+".venv 2"
+"web/node_modules 3"
+# Caches created inside component directories.
+**/.ruff_cache/
+**/.pytest_cache/
+**/.mypy_cache/
