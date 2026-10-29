@@ -1,0 +1,18 @@
+# D1 live gate: authenticated PR retrieval, diff mapping, real tool analysis
+# 2026-10-29T06:18:54Z
+
+$ make preflight-review   (configuration only)
+ruff=ruff 0.17.2 allowed_repositories=['google/adk-python']
+CONFIGURED_NOT_VERIFIED: pass --pr owner/repo#number to analyse a real PR.
+
+$ make verify-review PR=google/adk-python#7801
+uv run --frozen python -m scripts.review-preflight --pr google/adk-python#7801
+ruff=ruff 0.17.2 allowed_repositories=['google/adk-python']
+pull_request=google/adk-python#7801 state=open head=ec6c1d6ec55d files=2 fetch_ms=1464
+analysed=2 unanalysed=0 findings=35 in_changed_lines=4 analyse_ms=88
+  src/google/adk/integrations/firestore/firestore_session_service.py:326 [low] UP045 (ruff)
+  src/google/adk/integrations/firestore/firestore_session_service.py:327 [low] UP045 (ruff)
+  tests/unittests/integrations/firestore/test_firestore_session_service.py:1351 [low] SIM117 (ruff)
+  tests/unittests/integrations/firestore/test_firestore_session_service.py:1372 [low] SIM117 (ruff)
+evidence=docs/evidence/d1-review-run.json
+VERIFIED: authenticated PR retrieval, diff line mapping and real tool analysis.

@@ -1,0 +1,115 @@
+{
+  "started_at": "2026-10-29T06:19:04.298164+00:00",
+  "finished_at": "2026-10-29T06:19:06.603053+00:00",
+  "pull_request": {
+    "repository": "google/adk-python",
+    "number": 7801,
+    "title": "fix(firestore): validate session identity components before path use",
+    "state": "open",
+    "author": "CorgiBoyG",
+    "url": "https://github.com/google/adk-python/pull/7801",
+    "head_sha": "ec6c1d6ec55db42fc3dd40cc0109116a09efa4ea",
+    "base_sha": "3640e7d0c74bb2d377a58271ac6290d2e51ee60d"
+  },
+  "files": [
+    {
+      "path": "src/google/adk/integrations/firestore/firestore_session_service.py",
+      "status": "modified",
+      "language": "python",
+      "additions": 44,
+      "deletions": 6,
+      "hunk_ranges": [
+        [
+          173,
+          180
+        ],
+        [
+          184,
+          225
+        ],
+        [
+          235,
+          241
+        ],
+        [
+          326,
+          332
+        ],
+        [
+          503,
+          509
+        ],
+        [
+          543,
+          551
+        ]
+      ],
+      "added_line_count": 44,
+      "patch_present": true
+    },
+    {
+      "path": "tests/unittests/integrations/firestore/test_firestore_session_service.py",
+      "status": "modified",
+      "language": "python",
+      "additions": 96,
+      "deletions": 0,
+      "hunk_ranges": [
+        [
+          1329,
+          1427
+        ]
+      ],
+      "added_line_count": 96,
+      "patch_present": true
+    }
+  ],
+  "tool_versions": {
+    "ruff": "ruff 0.17.2",
+    "python-ast": "3.12.14"
+  },
+  "findings_in_changed_lines": [
+    {
+      "path": "src/google/adk/integrations/firestore/firestore_session_service.py",
+      "line": 326,
+      "rule": "UP045",
+      "message": "Use `X | None` for type annotations",
+      "source": "ruff",
+      "severity": "low",
+      "in_diff": true
+    },
+    {
+      "path": "src/google/adk/integrations/firestore/firestore_session_service.py",
+      "line": 327,
+      "rule": "UP045",
+      "message": "Use `X | None` for type annotations",
+      "source": "ruff",
+      "severity": "low",
+      "in_diff": true
+    },
+    {
+      "path": "tests/unittests/integrations/firestore/test_firestore_session_service.py",
+      "line": 1351,
+      "rule": "SIM117",
+      "message": "Use a single `with` statement with multiple contexts instead of nested `with` statements",
+      "source": "ruff",
+      "severity": "low",
+      "in_diff": true
+    },
+    {
+      "path": "tests/unittests/integrations/firestore/test_firestore_session_service.py",
+      "line": 1372,
+      "rule": "SIM117",
+      "message": "Use a single `with` statement with multiple contexts instead of nested `with` statements",
+      "source": "ruff",
+      "severity": "low",
+      "in_diff": true
+    }
+  ],
+  "findings_outside_changed_lines": 31,
+  "unanalysed": [],
+  "notes": [
+    "86 diagnostic(s) were dropped as expected in test files, such as `assert` usage, rather than reported as defects.",
+    "31 finding(s) fell outside the changed lines and are reported separately; a review must not comment on code this pull request did not touch.",
+    "Static analysis only. No test suite was executed, so no behavioural claim is made."
+  ]
+}
