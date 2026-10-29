@@ -2,7 +2,7 @@ UV ?= uv
 NPM ?= npm
 export UV_CACHE_DIR ?= $(CURDIR)/.cache/uv
 
-.PHONY: setup lint typecheck test check run-api run-web check-secrets check-container check-node setup-gemini-cli preflight-cli verify-cli verify-cli-pipeline preflight-bug verify-bug verify-triage preflight-review verify-review
+.PHONY: setup lint typecheck test check run-api run-web check-secrets check-container check-node setup-gemini-cli preflight-cli verify-cli verify-cli-pipeline preflight-bug verify-bug verify-triage preflight-review verify-review verify-review-pipeline
 setup:
 	$(UV) sync --locked
 	$(NPM) --prefix web ci
@@ -60,3 +60,5 @@ preflight-review:
 	$(UV) run --frozen python -m scripts.review-preflight
 verify-review:
 	$(UV) run --frozen python -m scripts.review-preflight --pr $(PR)
+verify-review-pipeline:
+	$(UV) run --frozen python -m scripts.review-smoke $(PR)
