@@ -32,6 +32,11 @@ class Settings(BaseSettings):
     # Part B. Blank gemini_cli_path falls back to the pinned local install, then PATH.
     gemini_cli_path: str = ""
     gemini_workspace: str = ""
+    # Part C. The default URL is the official remote GitHub MCP server's issues
+    # toolset in read-only mode; see agents/bug_assistant/README.md.
+    github_token: SecretStr = SecretStr("")
+    github_allowed_repositories: str = ""
+    github_mcp_url: str = "https://api.githubcopilot.com/mcp/x/issues/readonly"
     session_database_url: SecretStr = SecretStr("")
 
     @model_validator(mode="after")

@@ -1,0 +1,17 @@
+# C1 live gate: real MCP handshake and issue lookup
+# 2026-10-29T05:07:27Z
+# token supplied for this run from `gh auth token`; normal use reads GITHUB_TOKEN from local .env
+
+$ make preflight-bug (unconfigured)
+uv run --frozen python -m scripts.bug-preflight
+BLOCKED_GITHUB_TOKEN: set GITHUB_TOKEN in the local root .env to a fine-grained token with read-only Issues access.
+make: *** [preflight-bug] Error 2
+
+$ GITHUB_* set, make verify-bug
+uv run --frozen python -m scripts.bug-preflight --live
+transport=streamable_http url=https://api.githubcopilot.com/mcp/x/issues/readonly
+allowed_repositories=['google/adk-python']
+handshake_ms=1891 advertised=6 tools=['get_label', 'issue_read', 'list_issue_fields', 'list_issue_types', 'list_issues', 'search_issues']
+admitted=['get_label', 'issue_read', 'list_issue_fields', 'list_issue_types', 'list_issues', 'search_issues']
+lookup_ms=1220 response_chars=10465 repository=google/adk-python
+VERIFIED: MCP handshake, read-only tool scope and a real issue lookup.
