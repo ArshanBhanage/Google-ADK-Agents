@@ -27,3 +27,7 @@ class ReviewSettings(BaseSettings):
     # into a review that silently ignored most of the change.
     max_changed_files: int = 60
     max_patch_bytes: int = 400_000
+    # Posting a review comment is a side effect on someone else's repository, so it is
+    # a separate opt-in with a separately scoped token.
+    review_comment_enabled: bool = False
+    review_comment_token: SecretStr = SecretStr("")

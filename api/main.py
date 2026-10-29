@@ -31,6 +31,28 @@ from agents.bug_assistant.writes import (
     create_issue,
     mint_grant,
 )
+from agents.code_reviewer.comments import (
+    GRANT_TTL_SECONDS as COMMENT_TTL_SECONDS,
+)
+from agents.code_reviewer.comments import (
+    STATE_KEY as COMMENT_STATE_KEY,
+)
+from agents.code_reviewer.comments import (
+    CommentApprovalRequired,
+    CommentGrant,
+    PostedComment,
+    ProposedComment,
+    post_comment,
+    write_credentials,
+)
+from agents.code_reviewer.comments import authorize as authorize_comment
+from agents.code_reviewer.comments import mint_grant as mint_comment_grant
+from agents.code_reviewer.github import ReviewUnavailable
+from agents.code_reviewer.models import ReviewReport, ReviewRequest
+from agents.code_reviewer.report import to_markdown
+from agents.code_reviewer.run import PipelineError as ReviewPipelineError
+from agents.code_reviewer.run import ProviderBlocked as ReviewProviderBlocked
+from agents.code_reviewer.run import run_review
 from agents.gemini_cli_tool.models import CliAnswer, CliPlan, CliRequest, GroundingCheck
 from agents.gemini_cli_tool.run import PipelineError as CliPipelineError
 from agents.gemini_cli_tool.run import ProviderBlocked as CliProviderBlocked
@@ -84,6 +106,30 @@ class StageView(BaseModel):
     kind: str
     outcome: str
     detail: str
+
+
+def comment_blockers() -> list[str]:
+    """Why the comment route would refuse, reported before the user is offered it."""
+    try:
+        write_credentials()
+    except CommentApprovalRequired as exc:
+        return [str(exc).split(":", 1)[0]]
+    return []
+
+
+class CommentWriteRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    approval_token: str = Field(min_length=16, max_length=256)
+    proposed_comment: ProposedComment
+
+
+class ReviewResponse(BaseModel):
+    report: ReviewReport
+    markdown: str
+    proposed_comment: ProposedComment
+    approval: "ApprovalOffer"
+    stages: list["StageView"]
+    usage: "UsageView"
 
 
 class ApprovalOffer(BaseModel):
@@ -224,6 +270,120 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 actions=EventActions(state_delta=delta),
             ),
         )
+
+    @application.post(
+        "/api/agents/code_reviewer/{session_id}/review", response_model=ReviewResponse
+    )
+    async def review(
+        session_id: uuid.UUID,
+        body: ReviewRequest,
+        user: Annotated[Identity, Depends(identity)],
+    ) -> ReviewResponse:
+        """Read-only review. Offers an approval to comment but grants nothing."""
+        await get_session("code_reviewer", session_id, user)
+        started = time.monotonic()
+        try:
+            report, trace = await run_review(
+                body,
+                session_service=sessions,
+                user_id=user.subject,
+                session_id=str(session_id),
+            )
+        except ReviewProviderBlocked as exc:
+            raise HTTPException(503, str(exc)) from exc
+        except ReviewPipelineError as exc:
+            raise HTTPException(502, str(exc)) from exc
+        except ReviewUnavailable as exc:
+            raise HTTPException(409, str(exc)) from exc
+
+        proposal = ProposedComment(
+            owner=body.owner,
+            repo=body.repo,
+            pull_request=body.pull_request,
+            body=to_markdown(report),
+        )
+        minted = mint_comment_grant(proposal, user.subject)
+        await remember(
+            "code_reviewer", str(session_id), user.subject, {COMMENT_STATE_KEY: minted.as_dict()}
+        )
+        logger.info(
+            json.dumps(
+                {
+                    "agent": "code_reviewer",
+                    "session": str(session_id),
+                    "duration_ms": round((time.monotonic() - started) * 1000),
+                    "verified": len(report.verified_comments),
+                    "unverified": len(report.unverified_comments),
+                    "blocking": report.blocking,
+                    "test_status": report.test_status,
+                }
+            )
+        )
+        return ReviewResponse(
+            report=report,
+            markdown=proposal.body,
+            proposed_comment=proposal,
+            approval=ApprovalOffer(
+                approval_token=minted.token,
+                content_sha256=minted.content_sha256,
+                repository=minted.repository,
+                expires_in_seconds=int(COMMENT_TTL_SECONDS),
+                write_path_blocked_by=comment_blockers(),
+            ),
+            stages=[
+                StageView(name=s.name, kind=s.kind, outcome=s.outcome, detail="")
+                for s in trace.stages
+            ],
+            usage=UsageView(
+                prompt_tokens=trace.prompt_tokens,
+                output_tokens=trace.output_tokens,
+                thought_tokens=trace.thought_tokens,
+                billable_searches=0,
+            ),
+        )
+
+    @application.post(
+        "/api/agents/code_reviewer/{session_id}/comment", response_model=PostedComment
+    )
+    async def post_review_comment(
+        session_id: uuid.UUID,
+        body: CommentWriteRequest,
+        user: Annotated[Identity, Depends(identity)],
+    ) -> PostedComment:
+        """Post one review comment. Never approves and never merges."""
+        session = await sessions.get_session(
+            app_name="code_reviewer", user_id=user.subject, session_id=str(session_id)
+        )
+        if session is None:
+            raise HTTPException(404, "Session not found")
+        stored = session.state.get(COMMENT_STATE_KEY)
+        grant = CommentGrant.from_dict(stored) if isinstance(stored, dict) else None
+        try:
+            authorize_comment(grant, body.approval_token, body.proposed_comment, user.subject)
+        except CommentApprovalRequired as exc:
+            raise HTTPException(403, str(exc)) from exc
+        assert grant is not None
+        grant.used = True
+        await remember(
+            "code_reviewer", str(session_id), user.subject, {COMMENT_STATE_KEY: grant.as_dict()}
+        )
+        try:
+            posted = await post_comment(body.proposed_comment)
+        except CommentApprovalRequired as exc:
+            raise HTTPException(409, str(exc)) from exc
+        except ReviewUnavailable as exc:
+            raise HTTPException(502, str(exc)) from exc
+        logger.info(
+            json.dumps(
+                {
+                    "agent": "code_reviewer",
+                    "session": str(session_id),
+                    "action": "comment_posted",
+                    "id": posted.id,
+                }
+            )
+        )
+        return posted
 
     @application.post(
         "/api/agents/bug_assistant/{session_id}/triage", response_model=TriageResponse

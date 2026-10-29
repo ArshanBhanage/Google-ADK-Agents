@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BugAssistant } from './bug';
 import { CliInspector } from './cli';
+import { CodeReviewer } from './review';
 import { LeadResearch } from './lead';
 import './style.css';
 
@@ -59,7 +60,8 @@ function App() {
           {selected.id === 'lead_research' && session && <LeadResearch token={token} session={session}/>}
           {selected.id === 'gemini_cli_tool' && session && <CliInspector token={token} session={session}/>}
           {selected.id === 'bug_assistant' && session && <BugAssistant token={token} session={session}/>}
-          {!['lead_research', 'gemini_cli_tool', 'bug_assistant'].includes(selected.id) && <p>Agent execution is not implemented for this part.</p>}</>
+          {selected.id === 'code_reviewer' && session && <CodeReviewer token={token} session={session}/>}
+          {!['lead_research', 'gemini_cli_tool', 'bug_assistant', 'code_reviewer'].includes(selected.id) && <p>Agent execution is not implemented for this part.</p>}</>
           : <section className="grid" aria-label="Agent milestones">{status.agents.map(agent => <a className="card" key={agent.id} href={`#${agent.id}`}><span className="eyebrow">PART {agent.name[0]}</span><h2>{agent.name.slice(4)}</h2><span className="state">{agent.status.replaceAll('_', ' ')}</span><span className="arrow" aria-hidden="true">↗</span></a>)}</section>}
       </>}
       <footer>No live results, exports or deployment are claimed. Status reflects the current implementation.</footer>

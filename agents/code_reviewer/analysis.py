@@ -55,7 +55,9 @@ async def ruff_version() -> str:
         stderr=asyncio.subprocess.DEVNULL,
     )
     out, _ = await process.communicate()
-    return out.decode().strip() or "unknown"
+    # `ruff --version` prints "ruff X.Y.Z"; the caller already labels the tool.
+    reported = out.decode().strip()
+    return reported.removeprefix("ruff").strip() or "unknown"
 
 
 def syntax_findings(path: str, text: str, diff: FileDiff) -> list[Finding]:

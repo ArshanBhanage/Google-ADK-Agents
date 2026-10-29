@@ -1,0 +1,13 @@
+# D2 sandbox isolation gate
+# 2026-10-29T06:46:01Z
+$ pytest -m live tests/integration/test_sandbox_live.py
+tests/integration/test_sandbox_live.py::test_a_pull_request_is_refused_without_running_anything PASSED [ 11%]
+tests/integration/test_sandbox_live.py::test_passing_tests_are_reported_as_passed PASSED [ 22%]
+tests/integration/test_sandbox_live.py::test_failing_tests_are_reported_as_failed_not_as_an_error PASSED [ 33%]
+tests/integration/test_sandbox_live.py::test_the_sandbox_has_no_network PASSED [ 44%]
+tests/integration/test_sandbox_live.py::test_the_sandbox_runs_unprivileged PASSED [ 55%]
+tests/integration/test_sandbox_live.py::test_the_project_mount_is_read_only PASSED [ 66%]
+tests/integration/test_sandbox_live.py::test_missing_dependencies_are_tests_not_run_rather_than_failed PASSED [ 77%]
+tests/integration/test_sandbox_live.py::test_no_tests_collected_is_not_a_pass PASSED [ 88%]
+tests/integration/test_sandbox_live.py::test_the_isolation_record_names_every_control PASSED [100%]
+============================== 9 passed in 5.72s ===============================

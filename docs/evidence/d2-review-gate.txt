@@ -1,0 +1,12 @@
+# D2 live gate: ADK review pipeline over a real pull request
+# 2026-10-29T06:53:17Z
+# REVIEW_COMMENT_ENABLED=false throughout; nothing is posted to GitHub
+
+$ make verify-review-pipeline PR=google/adk-python#7801
+uv run --frozen python -m scripts.review-smoke google/adk-python#7801
+events=3 stages=['review_analysis:adk_deterministic_agent', 'review_reasoner:adk_llm_agent', 'review_assembler:adk_deterministic_agent']
+pull_request=google/adk-python#7801 head=ec6c1d6ec55d
+verified=2 unverified=0 discarded=0 blocking=False
+tool_evidence=4 outside_diff=31
+test_status=tests_not_run
+evidence=docs/evidence/d2-review-run.json markdown=docs/evidence/d2-review-report.md

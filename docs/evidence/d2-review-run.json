@@ -1,0 +1,135 @@
+{
+  "started_at": "2026-10-29T06:55:51.350593+00:00",
+  "finished_at": "2026-10-29T06:56:10.035639+00:00",
+  "request": {
+    "owner": "google",
+    "repo": "adk-python",
+    "pull_request": 7801
+  },
+  "trace": {
+    "invocation_id": "a3ad7d8c-d35a-4b80-a85a-a3e9412c3503",
+    "events": 3,
+    "stages": [
+      {
+        "name": "review_analysis",
+        "kind": "adk_deterministic_agent",
+        "outcome": "ran"
+      },
+      {
+        "name": "review_reasoner",
+        "kind": "adk_llm_agent",
+        "outcome": "ran"
+      },
+      {
+        "name": "review_assembler",
+        "kind": "adk_deterministic_agent",
+        "outcome": "ran"
+      }
+    ],
+    "usage": {
+      "prompt_tokens": 1627,
+      "output_tokens": 407,
+      "thought_tokens": 2706
+    }
+  },
+  "report": {
+    "repository": "google/adk-python",
+    "pull_request": 7801,
+    "title": "fix(firestore): validate session identity components before path use",
+    "head_sha": "ec6c1d6ec55db42fc3dd40cc0109116a09efa4ea",
+    "url": "https://github.com/google/adk-python/pull/7801",
+    "summary": "This pull request adds validation for session identity components before path construction in the Firestore session service along with unit tests. Static analysis identified minor code style suggestions from linter diagnostics, but no correctness or security defects were found in the changed code.",
+    "blocking": false,
+    "verified_comments": [
+      {
+        "path": "src/google/adk/integrations/firestore/firestore_session_service.py",
+        "line": 326,
+        "severity": "low",
+        "category": "style",
+        "finding": "Ruff diagnostic UP045 suggests using `X | None` instead of `Optional[X]`. While using `X | None` is modern Python style, `Optional` remains functionally correct.",
+        "recommendation": "Optionally update the type annotation to `X | None` for consistency with PEP 604.",
+        "confidence": "high",
+        "rule": "UP045"
+      },
+      {
+        "path": "tests/unittests/integrations/firestore/test_firestore_session_service.py",
+        "line": 1351,
+        "severity": "low",
+        "category": "style",
+        "finding": "Ruff diagnostic SIM117 flags nested `with` statements. Combining context managers into a single `with` statement is cleaner, though nested blocks are functionally identical.",
+        "recommendation": "Optionally combine the nested `with` statements into a single `with A, B:` statement.",
+        "confidence": "high",
+        "rule": "SIM117"
+      }
+    ],
+    "unverified_comments": [],
+    "discarded_comments": [],
+    "tool_evidence": [
+      {
+        "path": "src/google/adk/integrations/firestore/firestore_session_service.py",
+        "line": 326,
+        "rule": "UP045",
+        "message": "Use `X | None` for type annotations",
+        "source": "ruff",
+        "severity": "low"
+      },
+      {
+        "path": "src/google/adk/integrations/firestore/firestore_session_service.py",
+        "line": 327,
+        "rule": "UP045",
+        "message": "Use `X | None` for type annotations",
+        "source": "ruff",
+        "severity": "low"
+      },
+      {
+        "path": "tests/unittests/integrations/firestore/test_firestore_session_service.py",
+        "line": 1351,
+        "rule": "SIM117",
+        "message": "Use a single `with` statement with multiple contexts instead of nested `with` statements",
+        "source": "ruff",
+        "severity": "low"
+      },
+      {
+        "path": "tests/unittests/integrations/firestore/test_firestore_session_service.py",
+        "line": 1372,
+        "rule": "SIM117",
+        "message": "Use a single `with` statement with multiple contexts instead of nested `with` statements",
+        "source": "ruff",
+        "severity": "low"
+      }
+    ],
+    "evidence_outside_diff": 31,
+    "files_analysed": [
+      "src/google/adk/integrations/firestore/firestore_session_service.py",
+      "tests/unittests/integrations/firestore/test_firestore_session_service.py"
+    ],
+    "files_unanalysed": [],
+    "tool_versions": {
+      "ruff": "0.17.2",
+      "python-ast": "3.12.14"
+    },
+    "test_status": "tests_not_run",
+    "test_reason": "tests_not_run: executing a pull request's tests is refused by policy. A diff from an arbitrary contributor is untrusted code; static analysis was performed instead.",
+    "test_isolation": {
+      "image": "python:3.12-alpine",
+      "network": "none",
+      "user": "65534:65534 (unprivileged)",
+      "root_filesystem": "read-only",
+      "project_mount": "read-only bind",
+      "writable_space": "tmpfs /tmp, noexec, nosuid, 64m",
+      "memory": "512m, swap capped at 512m",
+      "cpus": "1",
+      "pids_limit": "128",
+      "capabilities": "all dropped",
+      "privilege_escalation": "no-new-privileges",
+      "runner": "python -m unittest (stdlib only; no package installation is possible)"
+    },
+    "limitations": [
+      "Unit tests were not executed due to security policy restricting untrusted PR code execution; verification was performed via static analysis only.",
+      "Test execution status is tests_not_run (executing a pull request's tests is refused by policy. A diff from an arbitrary contributor is untrusted code; static analysis was performed instead.). No behavioural claim is made about this change.",
+      "86 diagnostic(s) were dropped as expected in test files, such as `assert` usage, rather than reported as defects.",
+      "31 finding(s) fell outside the changed lines and are reported separately; a review must not comment on code this pull request did not touch.",
+      "Static analysis only. No test suite was executed, so no behavioural claim is made."
+    ]
+  }
+}

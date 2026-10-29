@@ -1,0 +1,28 @@
+# D2 end-to-end against the running API
+# 2026-10-29T06:54:58Z
+# REVIEW_COMMENT_ENABLED=false; nothing is posted to GitHub
+
+POST /api/sessions -> 201 id=4484ed9b-223f-468b-ad5f-c47b7006e304
+review, no credential -> 401 Bearer authentication required
+review, pr number 0 -> 422 [{'type': 'greater_than_equal', 'loc': ['body', 'pull_request'],
+review, repo not allowlisted -> 409 BLOCKED_REPOSITORY: attacker/elsewhere is not authorized for rev
+COMMENT with no approval -> 403 BLOCKED_NO_APPROVAL: no comment approval was requested for this 
+
+POST review -> 200 in 17s
+  google/adk-python#7801 head=ec6c1d6ec55d blocking=False
+  verified=2 unverified=0 discarded=0
+  tool_evidence=4 outside_diff=31
+  test_status=tests_not_run
+  isolation controls recorded=0
+  stages:
+    adk_deterministic_agent    review_analysis
+    adk_llm_agent              review_reasoner
+    adk_deterministic_agent    review_assembler
+  verified src/google/adk/integrations/firestore/firestore_session_service.py:326 [low/style] rule=UP045
+  verified tests/unittests/integrations/firestore/test_firestore_session_service.py:1351 [low/style] rule=SIM117
+
+  comment approval offered: sha256=4a076563fb70e9d0… blocked_by=['BLOCKED_COMMENT_DISABLED']
+  real approval + edited body -> 403 BLOCKED_CONTENT_CHANGED: the comment differs from what was
+  matching approval, posting disabled -> 409 BLOCKED_COMMENT_DISABLED: posting review comments is off. To enable 
+
+  asserted: both stage kinds present, head commit recorded, every unauthorized post refused

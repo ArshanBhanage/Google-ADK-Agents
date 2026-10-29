@@ -12,8 +12,8 @@ No application or live integration is complete at initialization.
 | B2 | CLI ADK pipeline | PASSED | Real trace and UI |
 | C1 | MCP tools | PASSED | Handshake and authorized issue search |
 | C2 | Bug workflow | PASSED | Evidence and approval boundaries |
-| D1 | Review analysis | NOT_STARTED | Real source/PR and deterministic diagnostics |
-| D2 | Review pipeline | NOT_STARTED | Grounded review and isolation controls |
+| D1 | Review analysis | PASSED | Real source/PR and deterministic diagnostics |
+| D2 | Review pipeline | PASSED | Grounded review and isolation controls |
 | E1 | Merchant/AlloyDB/Toolbox | NOT_STARTED | Real catalog sync and MCP query |
 | E2 | Commerce workflow | NOT_STARTED | Owned carts and genuine checkout handoff |
 | F | Integration | NOT_STARTED | All five live gates and documentation |
@@ -262,3 +262,28 @@ concurrent Part E work under `agents/ecommerce/`, owned by another session and u
 here. Its two blockers for that owner are unchanged: ruff `E501` at
 `agents/ecommerce/database.py:44` and `:50`, and a detect-secrets `Basic Auth
 Credentials` report at `agents/ecommerce/tests/test_config.py:14`.
+
+## D1 and D2 — PASSED 2026-10-29 (America/Los_Angeles)
+
+Full detail in `../agents/code_reviewer/MILESTONES.md`.
+
+- D1, `make verify-review PR=google/adk-python#7801`: fetched in 1464 ms, 2 Python
+  files, hunk ranges per file, analysed in 88 ms with ruff 0.17.2 and python-ast
+  3.12.14. 4 of 35 findings inside changed lines, 31 suppressed, 86 test-file
+  diagnostics dropped. Evidence: `evidence/d1-review-gate.txt`.
+- D2 sandbox, `evidence/d2-sandbox-gate.txt`: **9 live tests passed**. The container
+  fails attempts to reach the internet, run as root and write to the project mount;
+  missing dependencies are `tests_not_run`, not `failed`.
+- D2 end-to-end, `evidence/d2-api-e2e.txt`: `401` without a credential, `422` for
+  `pull_request: 0`, `409 BLOCKED_REPOSITORY` outside the allowlist,
+  `403 BLOCKED_NO_APPROVAL` for a forged post, `200` in 17 s for the review,
+  `403 BLOCKED_CONTENT_CHANGED` for a real approval with an edited body, and
+  `409 BLOCKED_COMMENT_DISABLED` for a matching approval while posting is off.
+- 277 unit tests pass, 87 for Part D, plus 9 live sandbox tests.
+
+No comment has been posted to any repository. Executing a pull request's tests is
+refused by policy, so `test_status` is `tests_not_run` with the isolation controls still
+reported.
+
+Verification remains **scoped**: `make check` is red from concurrent Part E work under
+`agents/ecommerce/`, owned by another session and untouched here.
