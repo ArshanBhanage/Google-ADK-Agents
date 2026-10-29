@@ -3,6 +3,7 @@
 import pytest
 from pydantic import SecretStr
 
+from agents.bug_assistant.config import BugSettings
 from agents.bug_assistant.mcp import (
     READ_ONLY_TOOLS,
     WRITE_MARKERS,
@@ -13,11 +14,10 @@ from agents.bug_assistant.mcp import (
     require_allowed,
     validate_url,
 )
-from packages.agent_core.config import Settings
 
 
-def settings(**overrides: object) -> Settings:
-    return Settings(_env_file=None, **overrides)  # type: ignore[arg-type]
+def settings(**overrides: object) -> BugSettings:
+    return BugSettings(_env_file=None, **overrides)  # type: ignore[arg-type]
 
 
 class FakeTool:

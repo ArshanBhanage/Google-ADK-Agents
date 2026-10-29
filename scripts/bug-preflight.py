@@ -5,6 +5,7 @@ import json
 import sys
 import time
 
+from agents.bug_assistant.config import BugSettings
 from agents.bug_assistant.mcp import (
     READ_ONLY_TOOLS,
     McpUnavailable,
@@ -13,11 +14,10 @@ from agents.bug_assistant.mcp import (
     build_toolset,
     validate_url,
 )
-from packages.agent_core.config import Settings
 
 
 async def main(live: bool) -> int:
-    settings = Settings()
+    settings = BugSettings()
     try:
         url = validate_url(settings.github_mcp_url)
         allowlist = sorted(allowed_repositories(settings))

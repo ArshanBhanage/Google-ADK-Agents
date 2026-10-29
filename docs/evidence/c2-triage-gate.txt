@@ -1,0 +1,12 @@
+# C2 live gate: triage over real MCP issue data
+# 2026-10-29T05:31:39Z
+# write path remains disabled: GITHUB_WRITE_ENABLED=false, no issue is created
+
+$ make verify-triage BUG_REPO=google/adk-python
+uv run --frozen python -m scripts.bug-triage-smoke google/adk-python
+events=7 mcp_actually_used=True
+stages=['issue_triage:adk_llm_agent:ran', 'search_repository_issues:mcp_tool_call:called', 'search_repository_issues:mcp_tool_call:COMPLETED', 'search_repository_issues:mcp_tool_call:called', 'search_repository_issues:mcp_tool_call:COMPLETED', 'issue_verifier:adk_deterministic_agent:ran', 'issue_drafter:adk_llm_agent:ran']
+repository=google/adk-python issues_searched=12 verified_duplicates=1 discarded=0
+severity=high
+draft_offered=True
+evidence=docs/evidence/c2-triage-run.json

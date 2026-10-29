@@ -21,7 +21,7 @@ from urllib.parse import urlsplit
 from google.adk.tools.base_tool import BaseTool
 from google.adk.tools.mcp_tool import McpToolset, StreamableHTTPConnectionParams
 
-from packages.agent_core.config import Settings
+from agents.bug_assistant.config import BugSettings
 
 READ_ONLY_TOOLS = frozenset(
     {
@@ -43,9 +43,9 @@ class McpUnavailable(RuntimeError):
     """The MCP server cannot be reached, or is not configured safely."""
 
 
-def allowed_repositories(settings: Settings | None = None) -> frozenset[str]:
+def allowed_repositories(settings: BugSettings | None = None) -> frozenset[str]:
     """The explicit `owner/repo` allowlist. Untrusted input is matched against this."""
-    config = settings or Settings()
+    config = settings or BugSettings()
     entries = {
         entry.strip().lower()
         for entry in config.github_allowed_repositories.split(",")
@@ -59,7 +59,7 @@ def allowed_repositories(settings: Settings | None = None) -> frozenset[str]:
     return frozenset(entries)
 
 
-def require_allowed(owner: str, repo: str, settings: Settings | None = None) -> str:
+def require_allowed(owner: str, repo: str, settings: BugSettings | None = None) -> str:
     """Resolve a repository only if the operator allowlisted it.
 
     The owner and repo may originate from a model or from tool output, so neither is
@@ -91,8 +91,8 @@ def validate_url(url: str) -> str:
     return url
 
 
-def connection(settings: Settings | None = None) -> StreamableHTTPConnectionParams:
-    config = settings or Settings()
+def connection(settings: BugSettings | None = None) -> StreamableHTTPConnectionParams:
+    config = settings or BugSettings()
     token = config.github_token.get_secret_value()
     if not token:
         raise McpUnavailable(
@@ -111,7 +111,7 @@ def connection(settings: Settings | None = None) -> StreamableHTTPConnectionPara
     )
 
 
-def build_toolset(settings: Settings | None = None) -> McpToolset:
+def build_toolset(settings: BugSettings | None = None) -> McpToolset:
     return McpToolset(connection_params=connection(settings))
 
 
